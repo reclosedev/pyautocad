@@ -53,9 +53,11 @@ class Autocad(object):
         if not container:
             container = self.doc.ActiveLayout.Block
         object_names = object_name_or_list
-        if object_names and isinstance(object_names, basestring):
-            object_names = (object_names,)
-        
+        if object_names:
+            if isinstance(object_names, basestring):
+                object_names = [object_names]
+            object_names = [n.lower() for n in object_names]
+                
         count = container.Count
         for i in xrange(count):
             item = container.Item(i)
@@ -63,7 +65,7 @@ class Autocad(object):
                 return
             if object_names:
                 object_name = item.ObjectName.lower()
-                if not any(possible_name.lower() in object_name for possible_name in object_names):
+                if not any(possible_name in object_name for possible_name in object_names):
                     continue
             if not fast:
                 item = self.best_interface(item)

@@ -47,7 +47,7 @@ class PointTestCase(unittest.TestCase):
         for arg in wrong_args:
             try:
                 p += arg
-                self.assert_(False, 'Wrong arg passed')
+                self.fail('Wrong arg passed')
             except Exception:
                 pass
 

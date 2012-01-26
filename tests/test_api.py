@@ -21,13 +21,13 @@ class MyTestCase(unittest.TestCase):
 
     def setUp(self):
         self.acad = Autocad(True)
-        #self.doc = self.acad.app.Documents.Add()
-        self.doc = self.acad.doc
+        self.doc = self.acad.app.Documents.Add()
         print 'Current', self.doc.Name
 
     def tearDown(self):
+        self.doc.Close(False)
         pass
-        #self.doc.Close(False)
+        
 
     def test_points_arguments(self):
         model = self.acad.model
@@ -82,8 +82,25 @@ class MyTestCase(unittest.TestCase):
         print t1.TextString
         print t2.TextString
         #self.acad.doc.Utility.GetString(True, u'\nEnter something')
-
-
+        
+    def test_iter_objects(self):
+        model = self.acad.model
+        p1 = APoint(0, 0, 0)
+        p2 = APoint(10, 10, 0)
+        n_lines = 10
+        n_texts = 15
+        for i in range(n_lines):
+            model.AddLine(p1, p2)
+        for i in range(n_texts):
+            model.AddMText(p2, 10, u'Dummy')
+            
+        lines_count = len(list(self.acad.iter_objects('Line')))
+        texts_count = len(list(self.acad.iter_objects('MText')))
+        all_count = len(list(self.acad.iter_objects(['MText', 'Line'])))
+        
+        self.assertEqual(lines_count, n_lines)
+        self.assertEqual(texts_count, n_texts)
+        self.assertEqual(all_count, n_lines + n_texts)
 
 if __name__ == '__main__':
     unittest.main()
