@@ -9,8 +9,8 @@ import re
 def distance(p1, p2):
     return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
 
-def unformat_text(s):
-    s = re.sub(r'\{?\\[^P][^;]+;', '', s)
+def unformat_text(s, exclude_list=('P', 'S')):
+    s = re.sub(r'\{?\\[^%s][^;]+;' % ''.join(exclude_list), '', s)
     s = re.sub(r'\}', '', s)
     return s
 

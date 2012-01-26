@@ -49,18 +49,26 @@ class Autocad(object):
             self._model = self.doc.ModelSpace
         return self._model
 
-    def iter_objects(self, object_name=None, container=None, limit=None, fast=False):
+    def iter_objects(self, object_name_or_list=None, container=None, limit=None, fast=False):
         if not container:
             container = self.doc.ActiveLayout.Block
+        object_names = object_name_or_list
+        if object_names and isinstance(object_names, basestring):
+            object_names = (object_names,)
+        
         count = container.Count
         for i in xrange(count):
             item = container.Item(i)
             if limit and i >= limit:
                 return
-            if not object_name or object_name in item.ObjectName.lower():
-                if not fast:
-                    item = self.best_interface(item)
-                yield item
+            if object_names:
+                object_name = item.ObjectName.lower()
+                if not any(possible_name.lower() in object_name for possible_name in object_names):
+                    continue
+            if not fast:
+                item = self.best_interface(item)
+            yield item
+    
 
     def iter_objects_fast(self, object_name=None, container=None, limit=None):
         return self.iter_objects(object_name, container, limit, fast=True)
@@ -68,9 +76,20 @@ class Autocad(object):
     def best_interface(self, obj):
         return comtypes.client.GetBestInterface(obj)
 
-    def prompt(self, s):
-        print s
-        self.doc.Utility.Prompt(u"%s\n" % s)
+    def prompt(self, text):
+        print text
+        self.doc.Utility.Prompt(u"%s\n" % text)
+        
+    def get_selection(self, text):
+        self.prompt(text)
+        try:
+            self.doc.SelectionSets.Item("SS1").Delete()
+        except Exception: 
+            print 'Delete failed'
+            pass
+        selection = self.doc.SelectionSets.Add("SS1")
+        selection.SelectOnScreen()
+        return selection
 
     aDouble = staticmethod(pyautocad.types.aDouble)
     aInt = staticmethod(pyautocad.types.aInt)
