@@ -3,26 +3,25 @@
 import time
 import re
 #import codecs
+import sys
 
-from pyautocad.api import Autocad
-#from pyautocad.utils import distance
-#from pyautocad.point import APoint
+from pyautocad import Autocad
 from pyautocad import utils
 
-acad = Autocad()
 
-# существующие светильники\P2х36
 # \A1;2ARCTIC SMC/SAN 254 \S2х54/2,5;\P300 лк
 def main():
-    #objects = acad.get_selection('Select objects')
+    acad = Autocad()
     objects = None
+    if 'i' in sys.argv[1:]:
+        objects = acad.get_selection('Select objects')
+
     for obj in acad.iter_objects(('MText', 'MLeader'), container=objects):
         try:        
             text = obj.TextString
         except Exception:
             continue
-        
-        text = utils.unformat_text(obj.TextString)
+        text = utils.unformat_text(text)
         m = re.search(ur'(?P<num>\d+)(?P<mark>.*?)\\S(?P<num_power>.*?)/.*?;', text)
         if not m:
             continue

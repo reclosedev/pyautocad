@@ -39,17 +39,17 @@ class MyTestCase(unittest.TestCase):
         for circle in self.acad.iter_objects('circle'):
             cp = APoint(circle.Center)
             model.AddCircle(-cp, circle.Radius)
-            print -cp
+            #print -cp
         #print c1.Center
 
     def test_types(self):
         model = self.acad.model
-        p1 = (0, 0, 0)
-        p2 = (10, 10, 0)
+        p1 = APoint(0, 0, 0)
+        p2 = APoint(10, 10, 0)
         p3 = tuple(p+10 for p in p2)
 
-        model.AddLine(aDouble(p1), aDouble(p2))
-        model.AddLine(aDouble(p2), aDouble(p3))
+        model.AddLine(p1, p2)
+        model.AddLine(p2, APoint(p3))
         lines = list(self.acad.iter_objects())
         self.assertEqual(len(lines), 2)
         self.assertEqual(lines[0].StartPoint, p1)
@@ -57,15 +57,15 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(lines[1].StartPoint, p2)
         self.assertEqual(lines[1].EndPoint, p3)
         with self.assertRaises(COMError):
-            model.AddLine(aDouble(0, 0), aDouble(0, 0, 0))
+            model.AddLine(aDouble(0, 0), APoint(0, 0, 0))
 
     def test_text(self):
         model = self.acad.model
         text1 = u'Русский текст'
         text2 = u'With paragraph \PYes'
 
-        t1 = model.AddText(text1, aDouble(0, 0, 0), 10)
-        t2 = model.AddText(text2, aDouble(10, 10, 0), 10)
+        t1 = model.AddText(text1, APoint(0, 0, 0), 10)
+        t2 = model.AddText(text2, APoint(10, 10, 0), 10)
 
         self.assertEqual(type(t1.TextString), unicode)
         self.assertEqual(t1.TextString, text1)
@@ -77,11 +77,11 @@ class MyTestCase(unittest.TestCase):
         text1 = 'Line1\nLine2\nLine3\\'
         text2 = 'Line1\\PLine2\\PLine3\\P'
 
-        t1 = model.AddMText(aDouble(0,0,0), 10, text1)
-        t2 = model.AddMText(aDouble(10,10,0), 10, text2)
-        print t1.TextString
-        print t2.TextString
-        #self.acad.doc.Utility.GetString(True, u'\nEnter something')
+        t1 = model.AddMText(APoint(0,0,0), 10, text1)
+        t2 = model.AddMText(APoint(10,10,0), 10, text2)
+        self.assertEqual(t1.TextString, text1)
+        self.assertEqual(t2.TextString, text2)
+
         
     def test_iter_objects(self):
         model = self.acad.model
