@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 import time
 import re
-import codecs
 
 from pyautocad import Autocad
-from pyautocad.utils import distance, mtext_to_string
-from pyautocad.point import APoint
+from pyautocad.utils import mtext_to_string
+
 
 acad = Autocad()
 

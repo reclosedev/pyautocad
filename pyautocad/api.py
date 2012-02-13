@@ -49,6 +49,14 @@ class Autocad(object):
             self._model = self.doc.ModelSpace
         return self._model
 
+    def iter_layouts(self, doc=None, skip_model=True):
+        if doc is None:
+            doc = self.doc
+        for layout in sorted(doc.Layouts, key=lambda x: x.TabOrder):
+            if skip_model and not layout.TabOrder:
+                continue
+            yield layout
+
     def iter_objects(self, object_name_or_list=None, container=None, limit=None, fast=False):
         if not container:
             container = self.doc.ActiveLayout.Block
