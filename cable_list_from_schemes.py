@@ -53,8 +53,8 @@ def get_cables(acad, known_targets):
 
 def main():
     acad = Autocad()
-    known_targets_file = "cables_kommash_zag_known.csv"
-    output_file = "cables_kommash_zag.csv"
+    known_targets_file = "cables_known.csv"
+    output_file = "cables_from_scheme.csv"
     if len(sys.argv) > 1:  # TODO optparse
         output_file = sys.argv[1]
     elif len(sys.argv) == 3:

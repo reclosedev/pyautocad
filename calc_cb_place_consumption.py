@@ -1,19 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import time
 import re
 
 from pyautocad import Autocad
-from pyautocad.utils import mtext_to_string
+from pyautocad.utils import mtext_to_string, timing
 
-
-acad = Autocad()
-
-def convert_tables_from_layouts():
-    print '%-15s| %s' % (u'Имя щита', u'Общее число модулей')
-    for layout in sorted(acad.doc.Layouts, key=lambda x: x.TabOrder):
-        if not layout.TabOrder:
-            continue  # skip Model space
+def main():
+    acad = Autocad()
+    print '%-20s| %s' % (u'Имя щита', u'Общее число модулей')
+    for layout in acad.iter_layouts():
         table = None
         for obj in acad.iter_objects("table", layout.Block):
             if obj.Columns == 5:
@@ -23,16 +18,27 @@ def convert_tables_from_layouts():
             continue
  
         total_modules = 0
-        for row in xrange(table.Rows):
+        row = -1
+        while row < table.Rows:
+            row += 1
             item_str = mtext_to_string(table.GetText(row, 2))
-            m = re.match(ur'(\d)[PР].*', item_str)
-            if not m:
-                continue
-            n_modules = int(m.group(1))
-            quantity = int(mtext_to_string(table.GetText(row-1, 3)))
-            total_modules += n_modules * quantity
-        print '%-15s| %s' % (layout.Name, total_modules)
+            m = re.match(ur'.*(\d)-([xх]|но)\s+полюс.*', item_str)
+            if m:
+                n_modules = int(m.group(1))
+                quantity = int(mtext_to_string(table.GetText(row, 3)))
+                row += 1  # skip next row
+            else:
+                m = re.match(ur'(\d)[PР].*', item_str)
+                if not m:
+                    continue
+                n_modules = int(m.group(1))
+                quantity = int(mtext_to_string(table.GetText(row-1, 3)))
 
-begin_time = time.time()
-convert_tables_from_layouts()
-print "Elapsed: %.4f" % (time.time() - begin_time)
+            total_modules += n_modules * quantity
+
+        print '%-20s| %s' % (layout.Name, total_modules)
+
+if __name__ == "__main__":
+    with timing():
+        main()
+    raw_input(u'\nPress enter to exit...')
