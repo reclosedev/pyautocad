@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #date: 16.01.12
-
 import re
 import math
 import array
+import logging
 
-#import win32com
+
 import comtypes
 import comtypes.gen.AutoCAD as ACAD
 #import comtypes.gen._851A4561_F4EC_4631_9B0C_E7DC407512C9_0_1_0 as r
 import pyautocad.types
 
+logger = logging.getLogger(__name__)
 
 class Autocad(object):
+    """
+    Main AutoCAD Automation object
+    """
 
     def __init__(self, create_if_not_exists=False, visible=True):
         self._open_if_not_run = create_if_not_exists
@@ -24,8 +28,13 @@ class Autocad(object):
 
     @property
     def app(self):
+        """
+        active `AutoCAD.Application`
+
+        if `Autocad` was created with `create_if_not_exists=True`,
+        it will create`AutoCAD.Application` if there is no active one
+        """
         if self._app is None:
-            #self._app = win32com.client.Dispatch('AutoCAD.Application')
             try:
                 self._app = comtypes.client.GetActiveObject('AutoCAD.Application')
             except WindowsError:
@@ -33,23 +42,29 @@ class Autocad(object):
                     raise
                 self._app = comtypes.client.CreateObject('AutoCAD.Application')
                 self._app.Visible = self._visible
-
-
         return self._app
 
     @property
     def doc(self):
+        """ `ActiveDocument` """
         if self._doc is None:
             self._doc = self.app.ActiveDocument
         return self._doc
 
     @property
     def model(self):
+        """ `ModelSpace` from active document """
         if self._model is None:
             self._model = self.doc.ModelSpace
         return self._model
 
     def iter_layouts(self, doc=None, skip_model=True):
+        """
+        Iterate layouts from `doc`
+
+        If `doc=None` (default), `ActiveDocument` used
+        `skip_model` omit `ModelSpace` if `True`
+        """
         if doc is None:
             doc = self.doc
         for layout in sorted(doc.Layouts, key=lambda x: x.TabOrder):
@@ -57,7 +72,17 @@ class Autocad(object):
                 continue
             yield layout
 
-    def iter_objects(self, object_name_or_list=None, container=None, limit=None, fast=False):
+    def iter_objects(self, object_name_or_list=None, container=None,
+                     limit=None, dont_cast=False):
+        """
+        Iterate objects from `container`
+
+          `object_name_or_list` - part of object type name, or list of it
+          `container` - Autocad container, default - `ActiveLayout.Block`
+          `limit` - max number of objects to return, default infinite
+          `dont_cast` - Don't retrieve best interface for object, may speedup
+                        iteration. Returned objects should be casted by caller
+        """
         if not container:
             container = self.doc.ActiveLayout.Block
         object_names = object_name_or_list
@@ -75,15 +100,19 @@ class Autocad(object):
                 object_name = item.ObjectName.lower()
                 if not any(possible_name in object_name for possible_name in object_names):
                     continue
-            if not fast:
+            if not dont_cast:
                 item = self.best_interface(item)
             yield item
     
 
     def iter_objects_fast(self, object_name=None, container=None, limit=None):
-        return self.iter_objects(object_name, container, limit, fast=True)
+        """
+        Shortcut for `iter_objects(dont_cast=True)`
+        """
+        return self.iter_objects(object_name, container, limit, dont_cast=True)
 
     def best_interface(self, obj):
+        """ Retrieve best interface for object """
         return comtypes.client.GetBestInterface(obj)
 
     def prompt(self, text):
@@ -95,9 +124,9 @@ class Autocad(object):
         try:
             self.doc.SelectionSets.Item("SS1").Delete()
         except Exception: 
-            print 'Delete failed'
-            pass
-        selection = self.doc.SelectionSets.Add("SS1")
+            logger.debug('Delete selection failed')
+
+        selection = self.doc.SelectionSets.Add('SS1')
         selection.SelectOnScreen()
         return selection
 
@@ -113,5 +142,3 @@ if __name__ == '__main__':
 
     for t in acad.iter_objects('mtext'):
         print t.TextString
-
-
