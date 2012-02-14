@@ -16,15 +16,12 @@ HEADER_TEXT_HEIGHT = 3.5
 TEXT_HEIGHT = 3.0
 ROW_HEIGHT = 8.0
 TABLE_WIDTH = 287
-FIRST_TABLE_ROWS = 22
-NEXT_TABLE_ROWS = 25
+FIRST_TABLE_ROWS = 23
+NEXT_TABLE_ROWS = 27
 
 
 acad = Autocad()
-def convert_cables_xls_to_autocad(filename):
-    data = list(read_cables_from_xls(filename))
-    
-    
+def convert_cables_xls_to_autocad(data):
     block = acad.doc.ActiveLayout.Block
     insert_point = APoint(20, 0)
     distance = APoint(TABLE_WIDTH + 5, 0, 0)
@@ -36,6 +33,8 @@ def convert_cables_xls_to_autocad(filename):
     create_pivot_table(block, insert_point + distance, pivot_cabels)
     pivot_dcount = pivot_table(data, count_double_pivot)
     create_pivot_table(block, insert_point + distance * 2, pivot_dcount)
+    tips_table = list(pivot_tips(pivot_dcount))
+    create_pivot_table(block, insert_point + distance * 3, tips_table)
     
 def read_cables_from_xls(filename):
     book = xlrd.open_workbook(filename)
@@ -124,7 +123,18 @@ def count_pivot(value):
     
 def count_double_pivot(value):
     return count_pivot(value) * 2
-
+    
+def try_float(val):
+    try:
+        return float(val)
+    except ValueError:
+        return 0.0
+        
+def normalize_section(section):
+    section = section.replace(u'х', u'x')  # replace russian h letter
+    section = section.replace(',', '.')
+    return section
+        
 def pivot_table(data, value_extractor=length_pivot):
     first_key = 4
     second_key = 3
@@ -148,15 +158,7 @@ def pivot_table(data, value_extractor=length_pivot):
     def sections_key(section):
         if '(' in section:  # it's hard to handle multicable feeders
             return section  # so return untouched (will be on top)
-        # normalize
-        section = section.replace(u'х', u'x')  # replace russian h letter
-        section = section.replace(',', '.')
-        def try_float(val):
-            try:
-                return float(val)
-            except ValueError:
-                return val
-        
+        section = normalize_section(section)
         return map(try_float, section.split('x'))
         
     cable_sections = sorted(cable_sections, key=sections_key, reverse=True)
@@ -168,9 +170,32 @@ def pivot_table(data, value_extractor=length_pivot):
             columns.append(pivot[cable_section][cable_type])
         result.append(columns)
     return result
+
+def pivot_tips(pivot_dcount):
+    tip_counts = []
+    for row in pivot_dcount[1:]:
+        tip_counts.append((row[0], sum(row[1:])))
     
+    result = defaultdict(int)
+    for section, count in tip_counts:
+        if '(' in section:
+            result[section] += count
+            continue
+        section = normalize_section(section)
+        col, sect = map(try_float, section.split('x'))  # TODO buggy
+        result[sect] += int(count * col)
+    
+    yield u'Сечение', u'Кол-во наконечников'
+    for sect in sorted(result.keys()):
+        yield sect, result[sect]
+    
+
 def main():
-    convert_cables_xls_to_autocad('test.xls')
+    #data = list(read_cables_from_xls('test.xls')) # 
+    data = list(read_cables_from_xls('cables_kommash.xls'))
+    convert_cables_xls_to_autocad(data)
+    #pivot_dcount = pivot_table(data, count_double_pivot)
+    #tips_table = list(pivot_tips(pivot_dcount))
        
 
 if __name__ == "__main__":
