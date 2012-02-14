@@ -80,7 +80,7 @@ class Autocad(object):
           `dont_cast` - Don't retrieve best interface for object, may speedup
                         iteration. Returned objects should be casted by caller
         """
-        if not container:
+        if container is None:
             container = self.doc.ActiveLayout.Block
         object_names = object_name_or_list
         if object_names:
@@ -106,6 +106,14 @@ class Autocad(object):
         Shortcut for `iter_objects(dont_cast=True)`
         """
         return self.iter_objects(object_name, container, limit, dont_cast=True)
+
+    def find_one(self, object_name, container=None, predicate=None):
+        if predicate is None:
+            predicate = bool
+        for obj in self.iter_objects(object_name, container):
+            if predicate(obj):
+                return obj
+        return None
 
     def best_interface(self, obj):
         """ Retrieve best interface for object """

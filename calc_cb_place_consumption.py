@@ -9,14 +9,10 @@ def main():
     acad = Autocad()
     print '%-20s| %s' % (u'Имя щита', u'Общее число модулей')
     for layout in acad.iter_layouts():
-        table = None
-        for obj in acad.iter_objects("table", layout.Block):
-            if obj.Columns == 5:
-                table = obj
-                break
+        table = acad.find_one('table', layout.Block, lambda x: x.Columns == 5)
         if not table:
             continue
- 
+
         total_modules = 0
         row = -1
         while row < table.Rows:
@@ -33,9 +29,7 @@ def main():
                     continue
                 n_modules = int(m.group(1))
                 quantity = int(mtext_to_string(table.GetText(row-1, 3)))
-
             total_modules += n_modules * quantity
-
         print '%-20s| %s' % (layout.Name, total_modules)
 
 if __name__ == "__main__":
