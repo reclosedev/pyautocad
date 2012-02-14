@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import codecs
+import sys
 
 from pyautocad import Autocad, APoint
 from pyautocad.utils import timing
@@ -27,7 +28,8 @@ def iter_drawings_names(acad, doc):
                 break
 
 def main():
-    output = codecs.open("names.txt", "w", encoding='utf-8')
+    filename = sys.argv[1] if sys.argv[1:] else 'names.txt'
+    output = codecs.open(filename, "w", encoding='utf-8')
     acad = Autocad()
     for doc in acad.app.Documents:
         print doc.Name

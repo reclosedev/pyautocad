@@ -4,6 +4,7 @@
 import time
 from collections import defaultdict
 from pprint import pprint
+import sys
 
 import xlrd
 
@@ -191,8 +192,9 @@ def calc_pivot_tips(pivot_dcount):
     
 
 def main():
+    filename = sys.argv[1] if sys.argv[1:] else 'cables_list.xls'
     acad = Autocad()
-    data = list(read_cables_from_xls('cables_list.xls'))
+    data = list(read_cables_from_xls(filename))
     add_cables_list_to_autocad(acad.doc.ActiveLayout.Block, data)
 
 if __name__ == "__main__":

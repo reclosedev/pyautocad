@@ -4,11 +4,10 @@ import os
 import sys
 import re
 import csv
-import time
 import logging
 
 from pyautocad import Autocad
-from pyautocad.utils import unformat_mtext
+from pyautocad.utils import unformat_mtext, timing
 
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -25,7 +24,7 @@ def get_known_targets(filename):
     for row in reader:
         if len(row) < 3:
             continue
-        row = [x.decode('windows-1251') for x in row]
+        row = [x.decode('cp1251') for x in row]
         targets[row[0]] = row[2]
     return targets
 
@@ -69,6 +68,5 @@ def main():
         writer.writerow([s.encode("cp1251") for s in row])
             
 if __name__ == "__main__":
-    begin_time = time.time()
-    main()
-    print "Elapsed: %.4f" % (time.time() - begin_time)      
+    with timing():
+        main()

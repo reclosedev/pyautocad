@@ -2,7 +2,6 @@
 #-*- coding: utf-8 -*-
 import time
 import re
-#import codecs
 import sys
 
 from pyautocad import Autocad
