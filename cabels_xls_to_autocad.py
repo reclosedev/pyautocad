@@ -3,6 +3,9 @@
 #date: 13.02.12
 import time
 import re
+from collections import defaultdict
+from pprint import pprint
+
 import xlrd
 
 from pyautocad import Autocad, ACAD
@@ -20,13 +23,20 @@ NEXT_TABLE_ROWS = 25
 acad = Autocad()
 def convert_cables_xls_to_autocad(filename):
     data = list(read_cables_from_xls(filename))
-    block = acad.iter_layouts().next().Block
+    
+    
+    block = acad.doc.ActiveLayout.Block
     insert_point = APoint(20, 0)
+    distance = APoint(TABLE_WIDTH + 5, 0, 0)
     create_and_fill(block, data[:FIRST_TABLE_ROWS], APoint(20, 0))
     for chunk in chunks(data[FIRST_TABLE_ROWS:], NEXT_TABLE_ROWS):
-        insert_point.x += TABLE_WIDTH + 5
+        insert_point += distance
         create_and_fill(block, chunk, insert_point)
-
+    pivot_cabels = pivot_table(data)
+    create_pivot_table(block, insert_point + distance, pivot_cabels)
+    pivot_dcount = pivot_table(data, count_double_pivot)
+    create_pivot_table(block, insert_point + distance * 2, pivot_dcount)
+    
 def read_cables_from_xls(filename):
     book = xlrd.open_workbook(filename)
     sheet = book.sheet_by_index(0)
@@ -50,6 +60,7 @@ def create_and_fill(block, entries, pos):
                 table.SetCellTextHeight(row, col, TEXT_HEIGHT)
                 if text:
                     table.SetText(row, col, text)
+        #table.SetRowHeight(row, ROW_HEIGHT)
     finally:
         table.RegenerateTableSuppressed = False
 
@@ -89,8 +100,78 @@ def chunks(thing, chunk_length):
     for i in xrange(0, len(thing), chunk_length):
         yield thing[i:i+chunk_length]
 
+def create_pivot_table(block, pos, pivot):
+    table = block.AddTable(pos, len(pivot)+5, len(pivot[0]), ROW_HEIGHT, 20.0)
+    table.RegenerateTableSuppressed = True
+    table.SetColumnWidth(0, 35)
+    table.DeleteRows(0, 2)
+    table.SetAlignment(ACAD.acDataRow, ACAD.acMiddleCenter)
+    table.VertCellMargin = 0.5
+    table.HorzCellMargin = 0.5
+    for row, columns in enumerate(pivot):
+        for col, data in enumerate(columns):
+            table.SetCellTextHeight(row, col, TEXT_HEIGHT)
+            if data:
+                table.SetText(row, col, unicode(data))
+    table.RegenerateTableSuppressed = False
+    return table
+
+def length_pivot(value):
+    return value
+
+def count_pivot(value):
+    return 1 if value else 0
+    
+def count_double_pivot(value):
+    return count_pivot(value) * 2
+
+def pivot_table(data, value_extractor=length_pivot):
+    first_key = 4
+    second_key = 3
+    value_key = 5
+    pivot = defaultdict(lambda : defaultdict(int))
+    cable_types = set()
+    
+    def try_int(val):
+        try:
+            return int(val)
+        except ValueError:
+            return 0
+            
+    for columns in data:
+        pivot[columns[first_key]][columns[second_key]] += value_extractor(try_int(columns[value_key]))
+        cable_types.add(columns[second_key])
+    cable_sections = sorted(pivot.keys())
+    cable_types = sorted(cable_types)
+
+    
+    def sections_key(section):
+        if '(' in section:  # it's hard to handle multicable feeders
+            return section  # so return untouched (will be on top)
+        # normalize
+        section = section.replace(u'х', u'x')  # replace russian h letter
+        section = section.replace(',', '.')
+        def try_float(val):
+            try:
+                return float(val)
+            except ValueError:
+                return val
+        
+        return map(try_float, section.split('x'))
+        
+    cable_sections = sorted(cable_sections, key=sections_key, reverse=True)
+
+    result = [[u'Cечение'] + list(cable_types)]
+    for cable_section in cable_sections:
+        columns = [cable_section]
+        for cable_type in cable_types:
+            columns.append(pivot[cable_section][cable_type])
+        result.append(columns)
+    return result
+    
 def main():
-    convert_cables_xls_to_autocad('cables2.xls')
+    convert_cables_xls_to_autocad('test.xls')
+       
 
 if __name__ == "__main__":
     begin_time = time.time()
