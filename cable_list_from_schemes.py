@@ -8,7 +8,7 @@ import time
 import logging
 
 from pyautocad import Autocad
-from pyautocad.utils import unformat_text
+from pyautocad.utils import unformat_mtext
 
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -34,7 +34,7 @@ def get_cables(acad, known_targets):
                 re.compile(ur"(?P<name>.*?)-(?P<source>.*?)\s*\\P\s*(?P<cable>.*?)-(?P<section>[\dxх,\(\)]+)\s+(?P<length>\d+)\s*[мm]")]
 
     for text in acad.iter_objects("dbmtext"):
-        text = unformat_text(text.TextString)
+        text = unformat_mtext(text.TextString)
         logger.info(text)
         m_cable = None
         for pattern in patterns:

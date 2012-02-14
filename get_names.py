@@ -1,47 +1,43 @@
-#!python
-#-*- coding: utf-8 -*-
-import time
-import re
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import codecs
 
-from pyautocad import Autocad
-from pyautocad.utils import distance
-from pyautocad.point import APoint
+from pyautocad import Autocad, APoint
+from pyautocad.utils import timing
 
 
-file = codecs.open("names.txt", "w", encoding='utf-8')
-acad = Autocad()
-
-def test_layouts():
-    for doc in acad.app.Documents:
-        print doc.Name
-        file.write(u"\n%s----------------->\n\n" % doc.Name)
-        get_drawings_names(doc)
-
-def get_drawings_names(doc):
-    for layout in sorted(doc.Layouts, key=lambda x: x.TabOrder):
-        if not layout.TabOrder:
-            continue  # skip Model space
-            
+def iter_drawings_names(acad, doc):
+    for layout in acad.iter_layouts(doc):
         print ">%s\t%s\t%s" % (layout.TabOrder, layout.Block.Count, layout.Name)
-                       
         # first we need to find our main stamp
         block_pos = None
         for block in acad.iter_objects("blockreference", layout.Block):
-            if block and "f4" in block.EffectiveName:
+            if "f4" in block.EffectiveName:
                 block_pos = APoint(block.InsertionPoint)
                 break
-        
         if not block_pos:
             continue
-        # aproximate position of drawing name        
+        # approximate position of drawing name
         name_pos = block_pos + APoint(-90, 12)
         for mt in acad.iter_objects("mtext", layout.Block):
             if name_pos.distance_to(mt.InsertionPoint) < 5.0:
                 text = mt.TextString
                 print text
-                file.write(u"%s\n" % text.replace(" \\P", " ").replace("\\P", " "))
-     
-begin_time = time.time()
-test_layouts()
-print "Elapsed: %.4f" % (time.time() - begin_time)
+                yield text.replace(" \\P", " ").replace("\\P", " ")
+                break
+
+def main():
+    output = codecs.open("names.txt", "w", encoding='utf-8')
+    acad = Autocad()
+    for doc in acad.app.Documents:
+        print doc.Name
+        output.write(u'%s\n' % ('-' * 50))
+        output.write(u"    %s\n" % doc.Name)
+        output.write(u'%s\n' % ('-' * 50))
+        for drawing_name in iter_drawings_names(acad, doc):
+            output.write(u'%s\n' % drawing_name)
+
+
+if __name__ == "__main__":
+    with timing():
+        main()

@@ -7,8 +7,8 @@ from pprint import pprint
 
 import xlrd
 
-from pyautocad import Autocad, ACAD
-from pyautocad.point import APoint
+from pyautocad import Autocad, ACAD, APoint
+from pyautocad.utils import timing
 
 
 HEADER_TEXT_HEIGHT = 3.5
@@ -19,33 +19,42 @@ TABLE_GAP = 100
 FIRST_TABLE_ROWS = 23
 NEXT_TABLE_ROWS = 27
 
-acad = Autocad()
 
-def convert_cables_xls_to_autocad(data):
-    block = acad.doc.ActiveLayout.Block
+def add_cables_list_to_autocad(block, data):
     insert_point = APoint(20, 0)
     distance = APoint(TABLE_WIDTH + TABLE_GAP, 0, 0)
 
-    create_and_fill(block, data[:FIRST_TABLE_ROWS], APoint(20, 0))
+    add_cables_table(block, data[:FIRST_TABLE_ROWS], APoint(20, 0))
     for chunk in chunks(data[FIRST_TABLE_ROWS:], NEXT_TABLE_ROWS):
         insert_point += distance
-        create_and_fill(block, chunk, insert_point)
+        add_cables_table(block, chunk, insert_point)
 
     # TODO names of pivot tables
-    pivot_cables = pivot_table(data)
-    create_pivot_table(block, insert_point + distance, pivot_cables)
-    pivot_dcount = pivot_table(data, count_double_pivot)
-    create_pivot_table(block, insert_point + distance * 2, pivot_dcount)
-    tips_table = list(pivot_tips(pivot_dcount))
-    create_pivot_table(block, insert_point + distance * 3, tips_table)
+
+    margin = APoint(0, TEXT_HEIGHT, 0)
+    insert_point += distance
+    block.AddText(u'Сводная таблица длин кабелей', insert_point + margin, TEXT_HEIGHT)
+    add_pivot_table(block, insert_point, list(calc_pivot_table(data)))
+
+    insert_point += distance
+    block.AddText(u'Сводная таблица кабельных разделок', insert_point + margin, TEXT_HEIGHT)
+    pivot_dcount = list(calc_pivot_table(data, count_double_pivot))
+    add_pivot_table(block, insert_point, pivot_dcount)
+
+    insert_point += distance
+    block.AddText(u'ВНИМАНИЕ! У кабелей со сложным сечением (например 4х(5х70)'
+                  u' и т.п.) указано количество разделок',
+                  insert_point + margin*4, TEXT_HEIGHT)
+    block.AddText(u'Сводная таблица наконечников', insert_point + margin, TEXT_HEIGHT)
+    add_pivot_table(block, insert_point, list(calc_pivot_tips(pivot_dcount)))
     
-def read_cables_from_xls(filename):
+def read_cables_from_xls(filename): # TODO add csv support
     book = xlrd.open_workbook(filename)
     sheet = book.sheet_by_index(0)
     for row in xrange(sheet.nrows):
         columns = []
         for col in xrange(min(9, sheet.ncols)):
-            text = val = sheet.cell(row, col).value
+            val = sheet.cell(row, col).value
             try:
                 text = unicode(int(val))
             except ValueError:
@@ -53,8 +62,8 @@ def read_cables_from_xls(filename):
             columns.append(text)
         yield columns
 
-def create_and_fill(block, entries, pos):
-    table = create_cables_table(block, pos, len(entries))
+def add_cables_table(block, entries, pos):
+    table = prepare_cables_table(block, pos, len(entries))
     table.RegenerateTableSuppressed = True  # speedup edit operations
     try:
         for row, row_data in enumerate(entries, 3):
@@ -65,7 +74,7 @@ def create_and_fill(block, entries, pos):
     finally:
         table.RegenerateTableSuppressed = False
 
-def create_cables_table(block, pos, rows):
+def prepare_cables_table(block, pos, rows):
     table = block.AddTable(pos, rows+5, 9, ROW_HEIGHT, 15.0)
     table.RegenerateTableSuppressed = True
     table.DeleteRows(0, 2)
@@ -101,7 +110,7 @@ def chunks(thing, chunk_length):
     for i in xrange(0, len(thing), chunk_length):
         yield thing[i:i+chunk_length]
 
-def create_pivot_table(block, pos, pivot):
+def add_pivot_table(block, pos, pivot):
     table = block.AddTable(pos, len(pivot)+5, len(pivot[0]), ROW_HEIGHT, 20.0)
     table.RegenerateTableSuppressed = True
     table.SetColumnWidth(0, 35)
@@ -137,7 +146,7 @@ def normalize_section(section):
     section = section.replace(',', '.')
     return section
         
-def pivot_table(data, value_extractor=length_pivot):
+def calc_pivot_table(data, value_extractor=length_pivot):
     first_key = 4
     second_key = 3
     value_key = 5
@@ -156,15 +165,14 @@ def pivot_table(data, value_extractor=length_pivot):
         return map(lambda x: try_convert(x, float), section.split('x'))
     cable_sections = sorted(cable_sections, key=sections_key, reverse=True)
 
-    result = [[u'Cечение'] + list(sorted(cable_types))]
+    yield [u'Cечение'] + list(sorted(cable_types))
     for cable_section in cable_sections:
         columns = [cable_section]
         for cable_type in cable_types:
             columns.append(pivot[cable_section][cable_type])
-        result.append(columns)
-    return result
+        yield columns
 
-def pivot_tips(pivot_dcount):
+def calc_pivot_tips(pivot_dcount):
     tip_counts = []
     for row in pivot_dcount[1:]:
         tip_counts.append((row[0], sum(row[1:])))
@@ -183,11 +191,10 @@ def pivot_tips(pivot_dcount):
     
 
 def main():
+    acad = Autocad()
     data = list(read_cables_from_xls('cables_list.xls'))
-    convert_cables_xls_to_autocad(data)
+    add_cables_list_to_autocad(acad.doc.ActiveLayout.Block, data)
 
 if __name__ == "__main__":
-    begin_time = time.time()
-    main()
-    print "Elapsed: %.4f" % (time.time() - begin_time)
-
+    with timing():
+        main()

@@ -3,7 +3,7 @@
 #date: 16.01.12
 import unittest
 
-from pyautocad.utils import unformat_text, mtext_to_string, string_to_mtext
+from pyautocad.utils import unformat_mtext, mtext_to_string, string_to_mtext
 
 class UtilsTestCase(unittest.TestCase):
     def test_unformat(self):
@@ -21,7 +21,7 @@ class UtilsTestCase(unittest.TestCase):
 ·	bullet2
 
 another font and bold"""]
-        result1 = map(unformat_text, texts)
+        result1 = map(unformat_mtext, texts)
         result2 = map(mtext_to_string, texts)
 
         self.assertEqual(result1, desired1)

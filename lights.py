@@ -21,7 +21,7 @@ def main():
             text = obj.TextString
         except Exception:
             continue
-        text = utils.unformat_text(text)
+        text = utils.unformat_mtext(text)
         m = re.search(ur'(?P<num>\d+)(?P<mark>.*?)\\S(?P<num_power>.*?)/.*?;', text)
         if not m:
             continue

@@ -8,7 +8,7 @@ from pyautocad import Autocad
 
 class MyTestCase(unittest.TestCase):
     def test_something(self):
-        self.assertEqual(True, False)
+        self.assertEqual(True, True)
 
 def main():
     acad = Autocad()

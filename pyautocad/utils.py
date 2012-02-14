@@ -1,25 +1,47 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #date: 16.01.12
-
-import math
+from contextlib import contextmanager
 import re
+import time
 
 
-def distance(p1, p2):
-    return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
+def unformat_mtext(s, exclude_list=('P', 'S')):
+    """
+    Remove format information from string
 
-def unformat_text(s, exclude_list=('P', 'S')):
+    `s` - string with multitext
+    `exclude_list` - don't touch tagse from this list. Default ('P', 'S') for
+    newline and fractions
+    """
     s = re.sub(r'\{?\\[^%s][^;]+;' % ''.join(exclude_list), '', s)
     s = re.sub(r'\}', '', s)
     return s
 
+def mtext_to_string(s):
+    """
+    Remove all format from string, replace P (paragraphs) with newlines
+    """
+    return unformat_mtext(s).replace(u'\\P', u'\n')
+
 def string_to_mtext(s):
+    """
+    Format string in Autocad multitext format
+    """
     return s.replace('\\', '\\\\').replace(u'\n', u'\P')
 
-def mtext_to_string(s):
-    return unformat_text(s).replace(u'\\P', u'\n')
-
 def text_width(text_item):
+    """
+    Calculate width of Autocad `Text` or `MultiText`
+    """
     bbox_min, bbox_max = text_item.GetBoundingbox()
     return bbox_max[0] - bbox_min[0]
+
+@contextmanager
+def timing(message='Elapsed'):
+    begin = time.time()
+    try:
+        yield begin
+    finally:
+        elapsed = (time.time() - begin)
+        print '%s: %.3f s' % (message, elapsed)

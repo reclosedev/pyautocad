@@ -3,7 +3,8 @@
 #date: 17.01.12
 import unittest
 
-from pyautocad.point import APoint
+from pyautocad.types import APoint
+
 
 class PointTestCase(unittest.TestCase):
     def test_point_ops(self):

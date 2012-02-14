@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #date: 16.01.12
-import re
-import math
-import array
 import logging
-
 
 import comtypes
 import comtypes.gen.AutoCAD as ACAD
-#import comtypes.gen._851A4561_F4EC_4631_9B0C_E7DC407512C9_0_1_0 as r
 import pyautocad.types
+
+__all__ = ['Autocad', 'ACAD']
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +18,7 @@ class Autocad(object):
 
     def __init__(self, create_if_not_exists=False, visible=True):
         self._open_if_not_run = create_if_not_exists
-        self._visible = True
+        self._visible = visible
         self._app = None
         self._doc = None
         self._model = None
@@ -93,7 +90,7 @@ class Autocad(object):
                 
         count = container.Count
         for i in xrange(count):
-            item = container.Item(i)
+            item = container.Item(i)  # it's faster than `for item in container`
             if limit and i >= limit:
                 return
             if object_names:
@@ -103,7 +100,6 @@ class Autocad(object):
             if not dont_cast:
                 item = self.best_interface(item)
             yield item
-    
 
     def iter_objects_fast(self, object_name=None, container=None, limit=None):
         """

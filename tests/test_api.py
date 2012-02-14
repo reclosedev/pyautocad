@@ -9,15 +9,14 @@ import inspect
 import comtypes.client
 import time
 
-from pyautocad import Autocad, aDouble, aShort, aInt
+from pyautocad import Autocad, aDouble, aShort, aInt, APoint
 
 import comtypes.gen._851A4561_F4EC_4631_9B0C_E7DC407512C9_0_1_0 as r
-from pyautocad.point import APoint
 
 NPASS = 3000
 
 
-class MyTestCase(unittest.TestCase):
+class ApiTestCase(unittest.TestCase):
 
     def setUp(self):
         self.acad = Autocad(True)
