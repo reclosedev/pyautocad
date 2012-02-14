@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 #date: 13.02.12
 import time
-import re
 from collections import defaultdict
 from pprint import pprint
 
@@ -16,21 +15,25 @@ HEADER_TEXT_HEIGHT = 3.5
 TEXT_HEIGHT = 3.0
 ROW_HEIGHT = 8.0
 TABLE_WIDTH = 287
+TABLE_GAP = 100
 FIRST_TABLE_ROWS = 23
 NEXT_TABLE_ROWS = 27
 
-
 acad = Autocad()
+
 def convert_cables_xls_to_autocad(data):
     block = acad.doc.ActiveLayout.Block
     insert_point = APoint(20, 0)
-    distance = APoint(TABLE_WIDTH + 5, 0, 0)
+    distance = APoint(TABLE_WIDTH + TABLE_GAP, 0, 0)
+
     create_and_fill(block, data[:FIRST_TABLE_ROWS], APoint(20, 0))
     for chunk in chunks(data[FIRST_TABLE_ROWS:], NEXT_TABLE_ROWS):
         insert_point += distance
         create_and_fill(block, chunk, insert_point)
-    pivot_cabels = pivot_table(data)
-    create_pivot_table(block, insert_point + distance, pivot_cabels)
+
+    # TODO names of pivot tables
+    pivot_cables = pivot_table(data)
+    create_pivot_table(block, insert_point + distance, pivot_cables)
     pivot_dcount = pivot_table(data, count_double_pivot)
     create_pivot_table(block, insert_point + distance * 2, pivot_dcount)
     tips_table = list(pivot_tips(pivot_dcount))
@@ -59,7 +62,6 @@ def create_and_fill(block, entries, pos):
                 table.SetCellTextHeight(row, col, TEXT_HEIGHT)
                 if text:
                     table.SetText(row, col, text)
-        #table.SetRowHeight(row, ROW_HEIGHT)
     finally:
         table.RegenerateTableSuppressed = False
 
@@ -103,7 +105,7 @@ def create_pivot_table(block, pos, pivot):
     table = block.AddTable(pos, len(pivot)+5, len(pivot[0]), ROW_HEIGHT, 20.0)
     table.RegenerateTableSuppressed = True
     table.SetColumnWidth(0, 35)
-    table.DeleteRows(0, 2)
+    table.DeleteRows(0, 2)  # delete Header and Title. SuppressHeader and SuppressTitle is not working.
     table.SetAlignment(ACAD.acDataRow, ACAD.acMiddleCenter)
     table.VertCellMargin = 0.5
     table.HorzCellMargin = 0.5
@@ -124,12 +126,12 @@ def count_pivot(value):
 def count_double_pivot(value):
     return count_pivot(value) * 2
     
-def try_float(val):
+def try_convert(val, val_type):
     try:
-        return float(val)
+        return val_type(val)
     except ValueError:
-        return 0.0
-        
+        return val_type()
+
 def normalize_section(section):
     section = section.replace(u'х', u'x')  # replace russian h letter
     section = section.replace(',', '.')
@@ -141,29 +143,20 @@ def pivot_table(data, value_extractor=length_pivot):
     value_key = 5
     pivot = defaultdict(lambda : defaultdict(int))
     cable_types = set()
-    
-    def try_int(val):
-        try:
-            return int(val)
-        except ValueError:
-            return 0
-            
+
     for columns in data:
-        pivot[columns[first_key]][columns[second_key]] += value_extractor(try_int(columns[value_key]))
+        pivot[columns[first_key]][columns[second_key]] += value_extractor(try_convert(columns[value_key], int))
         cable_types.add(columns[second_key])
     cable_sections = sorted(pivot.keys())
-    cable_types = sorted(cable_types)
 
-    
     def sections_key(section):
         if '(' in section:  # it's hard to handle multicable feeders
             return section  # so return untouched (will be on top)
         section = normalize_section(section)
-        return map(try_float, section.split('x'))
-        
+        return map(lambda x: try_convert(x, float), section.split('x'))
     cable_sections = sorted(cable_sections, key=sections_key, reverse=True)
 
-    result = [[u'Cечение'] + list(cable_types)]
+    result = [[u'Cечение'] + list(sorted(cable_types))]
     for cable_section in cable_sections:
         columns = [cable_section]
         for cable_type in cable_types:
@@ -175,14 +168,13 @@ def pivot_tips(pivot_dcount):
     tip_counts = []
     for row in pivot_dcount[1:]:
         tip_counts.append((row[0], sum(row[1:])))
-    
     result = defaultdict(int)
     for section, count in tip_counts:
         if '(' in section:
             result[section] += count
             continue
         section = normalize_section(section)
-        col, sect = map(try_float, section.split('x'))  # TODO buggy
+        col, sect = map(lambda x: try_convert(x, float), section.split('x', 2))  # TODO buggy
         result[sect] += int(count * col)
     
     yield u'Сечение', u'Кол-во наконечников'
@@ -191,12 +183,8 @@ def pivot_tips(pivot_dcount):
     
 
 def main():
-    #data = list(read_cables_from_xls('test.xls')) # 
-    data = list(read_cables_from_xls('cables_kommash.xls'))
+    data = list(read_cables_from_xls('cables_list.xls'))
     convert_cables_xls_to_autocad(data)
-    #pivot_dcount = pivot_table(data, count_double_pivot)
-    #tips_table = list(pivot_tips(pivot_dcount))
-       
 
 if __name__ == "__main__":
     begin_time = time.time()
