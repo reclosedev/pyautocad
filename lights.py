@@ -1,6 +1,5 @@
 #/usr/bin/env python
 #-*- coding: utf-8 -*-
-import time
 import re
 import sys
 
@@ -27,6 +26,8 @@ def main():
         
         print m.group('num'), m.group('mark'), m.group('num_power')
 
-begin_time = time.time()
-main()
-print "Elapsed: %.4f" % (time.time() - begin_time)
+
+if __name__ == "__main__":
+    with utils.timing():
+        main()
+

@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #date: 13.02.12
-import time
-from collections import defaultdict
-from pprint import pprint
 import sys
+from collections import defaultdict
 
 import xlrd
 
@@ -183,8 +181,9 @@ def calc_pivot_tips(pivot_dcount):
             result[section] += count
             continue
         section = normalize_section(section)
-        col, sect = map(lambda x: try_convert(x, float), section.split('x', 2))  # TODO buggy
-        result[sect] += int(count * col)
+        count_sect = map(lambda x: try_convert(x, float), section.split('x', 2))  # TODO buggy
+        if len(count_sect) == 2:
+            result[count_sect[1]] += int(count_sect[0] * count_sect[1])
     
     yield u'Сечение', u'Кол-во наконечников'
     for sect in sorted(result.keys()):
