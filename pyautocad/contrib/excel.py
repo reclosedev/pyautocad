@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #date: 15.02.12
-from cStringIO import StringIO
 import csv
+from cStringIO import StringIO
+
+
 import xlwt
 
 
@@ -22,6 +24,7 @@ class CsvWriter(object):
             output.write(self._stream.getvalue())
         self._stream.close()
 
+
 class XlsWriter(object):
 
     def __init__(self, filename):
@@ -39,6 +42,18 @@ class XlsWriter(object):
         with open(self.filename, 'wb') as output:
             self._workbook.save(output)
 
+
+_writers = {'csv': CsvWriter, 'xls': XlsWriter}
+
+
+def get_writer(format='csv'):
+    if format not in _writers:
+        raise RuntimeError('Unknown format')
+    return _writers[format]
+
+
+def available_formats():
+    return _writers.keys()
+
 # TODO better interface
 # TODO xls reader
-# TODO get_writer(format='csv') factory

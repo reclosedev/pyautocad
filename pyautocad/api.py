@@ -11,9 +11,9 @@ __all__ = ['Autocad', 'ACAD']
 
 logger = logging.getLogger(__name__)
 
+
 class Autocad(object):
-    """
-    Main AutoCAD Automation object
+    """Main AutoCAD Automation object
     """
 
     def __init__(self, create_if_not_exists=False, visible=True):
@@ -25,8 +25,7 @@ class Autocad(object):
 
     @property
     def app(self):
-        """
-        active `AutoCAD.Application`
+        """active `AutoCAD.Application`
 
         if `Autocad` was created with `create_if_not_exists=True`,
         it will create`AutoCAD.Application` if there is no active one
@@ -56,8 +55,7 @@ class Autocad(object):
         return self._model
 
     def iter_layouts(self, doc=None, skip_model=True):
-        """
-        Iterate layouts from `doc`
+        """Iterate layouts from `doc`
 
         If `doc=None` (default), `ActiveDocument` used
         `skip_model` omit `ModelSpace` if `True`
@@ -71,8 +69,7 @@ class Autocad(object):
 
     def iter_objects(self, object_name_or_list=None, container=None,
                      limit=None, dont_cast=False):
-        """
-        Iterate objects from `container`
+        """Iterate objects from `container`
 
           `object_name_or_list` - part of object type name, or list of it
           `container` - Autocad container, default - `ActiveLayout.Block`
@@ -87,7 +84,7 @@ class Autocad(object):
             if isinstance(object_names, basestring):
                 object_names = [object_names]
             object_names = [n.lower() for n in object_names]
-                
+
         count = container.Count
         for i in xrange(count):
             item = container.Item(i)  # it's faster than `for item in container`
@@ -102,8 +99,7 @@ class Autocad(object):
             yield item
 
     def iter_objects_fast(self, object_name=None, container=None, limit=None):
-        """
-        Shortcut for `iter_objects(dont_cast=True)`
+        """Shortcut for `iter_objects(dont_cast=True)`
         """
         return self.iter_objects(object_name, container, limit, dont_cast=True)
 
@@ -122,12 +118,12 @@ class Autocad(object):
     def prompt(self, text):
         print text
         self.doc.Utility.Prompt(u"%s\n" % text)
-        
+
     def get_selection(self, text):
         self.prompt(text)
         try:
             self.doc.SelectionSets.Item("SS1").Delete()
-        except Exception: 
+        except Exception:
             logger.debug('Delete selection failed')
 
         selection = self.doc.SelectionSets.Add('SS1')
@@ -138,11 +134,12 @@ class Autocad(object):
     aInt = staticmethod(pyautocad.types.aInt)
     aShort = staticmethod(pyautocad.types.aShort)
 
+
 if __name__ == '__main__':
     acad = Autocad()
     text = 'Line1\nLine2\nLine3\n\n\nBackslash\\ and \\P {}'
     from pyautocad.utils import string_to_mtext
-    acad.model.AddMText(acad.aDouble(0,0,0), 10, string_to_mtext(text))
+    acad.model.AddMText(acad.aDouble(0, 0, 0), 10, string_to_mtext(text))
 
     for t in acad.iter_objects('mtext'):
         print t.TextString

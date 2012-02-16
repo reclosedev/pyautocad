@@ -15,7 +15,7 @@ def main():
         objects = acad.get_selection('Select objects')
 
     for obj in acad.iter_objects(('MText', 'MLeader'), container=objects):
-        try:        
+        try:
             text = obj.TextString
         except Exception:
             continue
@@ -23,11 +23,10 @@ def main():
         m = re.search(ur'(?P<num>\d+)(?P<mark>.*?)\\S(?P<num_power>.*?)/.*?;', text)
         if not m:
             continue
-        
+
         print m.group('num'), m.group('mark'), m.group('num_power')
 
 
 if __name__ == "__main__":
     with utils.timing():
         main()
-

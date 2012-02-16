@@ -29,7 +29,6 @@ def add_cables_list_to_autocad(block, data):
         add_cables_table(block, chunk, insert_point)
 
     # TODO names of pivot tables
-
     margin = APoint(0, TEXT_HEIGHT, 0)
     insert_point += distance
     block.AddText(u'Сводная таблица длин кабелей', insert_point + margin, TEXT_HEIGHT)
@@ -43,11 +42,12 @@ def add_cables_list_to_autocad(block, data):
     insert_point += distance
     block.AddText(u'ВНИМАНИЕ! У кабелей со сложным сечением (например 4х(5х70)'
                   u' и т.п.) указано количество разделок',
-                  insert_point + margin*4, TEXT_HEIGHT)
+                  insert_point + margin * 4, TEXT_HEIGHT)
     block.AddText(u'Сводная таблица наконечников', insert_point + margin, TEXT_HEIGHT)
     add_pivot_table(block, insert_point, list(calc_pivot_tips(pivot_dcount)))
-    
-def read_cables_from_xls(filename): # TODO add csv support
+
+
+def read_cables_from_xls(filename):  # TODO add csv support
     book = xlrd.open_workbook(filename)
     sheet = book.sheet_by_index(0)
     for row in xrange(sheet.nrows):
@@ -61,6 +61,7 @@ def read_cables_from_xls(filename): # TODO add csv support
             columns.append(text)
         yield columns
 
+
 def add_cables_table(block, entries, pos):
     table = prepare_cables_table(block, pos, len(entries))
     table.RegenerateTableSuppressed = True  # speedup edit operations
@@ -73,17 +74,18 @@ def add_cables_table(block, entries, pos):
     finally:
         table.RegenerateTableSuppressed = False
 
+
 def prepare_cables_table(block, pos, rows):
-    table = block.AddTable(pos, rows+5, 9, ROW_HEIGHT, 15.0)
+    table = block.AddTable(pos, rows + 5, 9, ROW_HEIGHT, 15.0)
     table.RegenerateTableSuppressed = True
     table.DeleteRows(0, 2)
     table.SetAlignment(ACAD.acDataRow, ACAD.acMiddleCenter)
     table.VertCellMargin = 0.5
     table.HorzCellMargin = 0.5
 
-    content = ((u"Обозначение кабеля, провода",u"Трасса","",u"Кабель, провод","","","","",),
-               ("",u"Начало",u"Конец",u"По проекту","","",u"Проложен","", ),
-               ("","","",u"Марка",u"Кол., число и сечение жил",u"Длина, м",u"Марка",u"Кол., число и сечение жил",u"Длина, м"))
+    content = ((u"Обозначение кабеля, провода", u"Трасса", "", u"Кабель, провод", "", "", "", "",),
+               ("", u"Начало", u"Конец", u"По проекту", "", "", u"Проложен", "", ),
+               ("", "", "", u"Марка", u"Кол., число и сечение жил", u"Длина, м", u"Марка", u"Кол., число и сечение жил", u"Длина, м"))
 
     merged = ((1, 1, 6, 8), (0, 2, 0, 0), (1, 2, 1, 1), (0, 0, 3, 8),
               (0, 0, 0, 0), (1, 2, 2, 2), (1, 1, 3, 5), (0, 0, 1, 2))
@@ -105,12 +107,14 @@ def prepare_cables_table(block, pos, rows):
     table.RegenerateTableSuppressed = False
     return table
 
+
 def chunks(thing, chunk_length):
     for i in xrange(0, len(thing), chunk_length):
-        yield thing[i:i+chunk_length]
+        yield thing[i:i + chunk_length]
+
 
 def add_pivot_table(block, pos, pivot):
-    table = block.AddTable(pos, len(pivot)+5, len(pivot[0]), ROW_HEIGHT, 20.0)
+    table = block.AddTable(pos, len(pivot) + 5, len(pivot[0]), ROW_HEIGHT, 20.0)
     table.RegenerateTableSuppressed = True
     table.SetColumnWidth(0, 35)
     table.DeleteRows(0, 2)  # delete Header and Title. SuppressHeader and SuppressTitle is not working.
@@ -125,31 +129,37 @@ def add_pivot_table(block, pos, pivot):
     table.RegenerateTableSuppressed = False
     return table
 
+
 def length_pivot(value):
     return value
 
+
 def count_pivot(value):
     return 1 if value else 0
-    
+
+
 def count_double_pivot(value):
     return count_pivot(value) * 2
-    
+
+
 def try_convert(val, val_type):
     try:
         return val_type(val)
     except ValueError:
         return val_type()
 
+
 def normalize_section(section):
     section = section.replace(u'х', u'x')  # replace russian h letter
     section = section.replace(',', '.')
     return section
-        
+
+
 def calc_pivot_table(data, value_extractor=length_pivot):
     first_key = 4
     second_key = 3
     value_key = 5
-    pivot = defaultdict(lambda : defaultdict(int))
+    pivot = defaultdict(lambda: defaultdict(int))
     cable_types = set()
 
     for columns in data:
@@ -171,6 +181,7 @@ def calc_pivot_table(data, value_extractor=length_pivot):
             columns.append(pivot[cable_section][cable_type])
         yield columns
 
+
 def calc_pivot_tips(pivot_dcount):
     tip_counts = []
     for row in pivot_dcount[1:]:
@@ -184,17 +195,18 @@ def calc_pivot_tips(pivot_dcount):
         count_sect = map(lambda x: try_convert(x, float), section.split('x', 2))  # TODO buggy
         if len(count_sect) == 2:
             result[count_sect[1]] += int(count_sect[0] * count_sect[1])
-    
+
     yield u'Сечение', u'Кол-во наконечников'
     for sect in sorted(result.keys()):
         yield sect, result[sect]
-    
+
 
 def main():
     filename = sys.argv[1] if sys.argv[1:] else 'cables_list.xls'
     acad = Autocad()
     data = list(read_cables_from_xls(filename))
     add_cables_list_to_autocad(acad.doc.ActiveLayout.Block, data)
+
 
 if __name__ == "__main__":
     with timing():

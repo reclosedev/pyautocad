@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #date: 13.02.12
-import sys
 import pprint
 
 from pyautocad import Autocad, utils
+
 
 def print_table_info(table, print_rows=0):
     merged = set()
@@ -32,6 +32,7 @@ def print_table_info(table, print_rows=0):
             print u"        [%s]," % u", ".join("u'%s'" % s for s in row)
         print ']'
 
+
 def main():
     acad = Autocad()
     layout = acad.doc.ActiveLayout
@@ -39,8 +40,6 @@ def main():
     if not table:
         return
     print_table_info(table, 3)
-
-
 
 
 if __name__ == '__main__':

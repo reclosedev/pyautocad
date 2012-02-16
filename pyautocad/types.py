@@ -5,11 +5,12 @@ import array
 import operator
 import math
 
+
 class APoint(array.array):
     def __new__(cls, x_or_seq, y=0.0, z=0.0):
         if isinstance(x_or_seq, (array.array, list, tuple)) and len(x_or_seq) == 3:
-            return super(APoint, cls).__new__(cls,'d', x_or_seq)
-        return super(APoint, cls).__new__(cls,'d', (x_or_seq, y, z))
+            return super(APoint, cls).__new__(cls, 'd', x_or_seq)
+        return super(APoint, cls).__new__(cls, 'd', (x_or_seq, y, z))
 
     def distance_to(self, other):
         return distance(self, other)
@@ -97,19 +98,24 @@ class APoint(array.array):
             return False
         return tuple(self) == tuple(other)
 
+
 def distance(p1, p2):
-    return math.sqrt((p1[0] - p2[0])**2 +
-                     (p1[1] - p2[1])**2 +
-                     (p1[2] - p2[2])**2)
+    return math.sqrt((p1[0] - p2[0]) ** 2 +
+                     (p1[1] - p2[1]) ** 2 +
+                     (p1[2] - p2[2]) ** 2)
+
 
 def aDouble(*seq):
     return _sequence_to_comtypes('d', *seq)
 
+
 def aInt(*seq):
     return _sequence_to_comtypes('l', *seq)
 
+
 def aShort(*seq):
     return _sequence_to_comtypes('h', *seq)
+
 
 def _sequence_to_comtypes(typecode='d', *sequence):
     if len(sequence) == 1:

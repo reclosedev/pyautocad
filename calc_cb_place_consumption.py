@@ -5,6 +5,7 @@ import re
 from pyautocad import Autocad
 from pyautocad.utils import mtext_to_string, timing
 
+
 def main():
     acad = Autocad()
     print u'Примерный подсчет занимаемого места'
@@ -33,9 +34,10 @@ def main():
                 if not m:
                     continue
                 n_modules = int(m.group(1))
-                quantity = int(mtext_to_string(table.GetText(row-1, 3)))
+                quantity = int(mtext_to_string(table.GetText(row - 1, 3)))
             total_modules += n_modules * quantity
         print '%-20s| %s' % (layout.Name, total_modules)
+
 
 if __name__ == "__main__":
     with timing():

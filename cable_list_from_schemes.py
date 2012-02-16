@@ -28,9 +28,16 @@ def get_known_targets(filename):
         targets[row[0]] = row[2]
     return targets
 
+
 def get_cables(acad, known_targets):
-    patterns = [re.compile(ur"(?P<cable>.*?)-(?P<section>[\dxх,\(\)]+)\s+(?P<length>\d+)\s*[мm]\\P\s*(?P<name>[^-]+)-(?P<source>.+)\s*"),
-                re.compile(ur"(?P<name>.*?)-(?P<source>.*?)\s*\\P\s*(?P<cable>.*?)-(?P<section>[\dxх,\(\)]+)\s+(?P<length>\d+)\s*[мm]")]
+    patterns = [ur"""(?P<cable>.*?)-(?P<section>[\dxх,\(\)]+)\s+
+                     (?P<length>\d+)\s*[мm]\\P
+                     \s*(?P<name>[^-]+)-(?P<source>.+)\s*""",
+
+                ur"""(?P<name>.*?)-(?P<source>.*?)\s*\\P
+                      \s*(?P<cable>.*?)-(?P<section>[\dxх,\(\)]+)\s+
+                      (?P<length>\d+)\s*[мm]"""]
+    patterns = [re.compile(pat, re.VERBOSE) for pat in patterns]
 
     for text in acad.iter_objects("dbmtext"):
         text = unformat_mtext(text.TextString)
@@ -49,24 +56,29 @@ def get_cables(acad, known_targets):
         target = known_targets.get(cable_name, '')
         if not target:
             target = m['name']
-        yield (cable_name, m['source'], target, m['cable'], m['section'], m['length'])
+        yield (cable_name, m['source'], target,
+               m['cable'], m['section'], m['length'])
+
 
 def main():
     acad = Autocad()
+
     known_targets_file = "cables_known.csv"
-    output_file = "cables_from_scheme.csv"
+    output_file = "cables_from_%s.csv" % acad.doc.Name
     if len(sys.argv) > 1:  # TODO optparse
         output_file = sys.argv[1]
     elif len(sys.argv) == 3:
         known_targets_file = sys.argv[2]
     cables = get_cables(acad, get_known_targets(known_targets_file))
-    sorted_cables = sorted(cables, key=lambda x: (x[1], x[0])) # TODO sort based on known targets
+    # TODO sort based on known targets
+    sorted_cables = sorted(cables, key=lambda x: (x[1], x[0]))
 
     # TODO save to .xls (option)
     writer = csv.writer(open(output_file, "wb"), delimiter=';')
     for row in sorted_cables:
         writer.writerow([s.encode("cp1251") for s in row])
-            
+
+
 if __name__ == "__main__":
     with timing():
         main()
