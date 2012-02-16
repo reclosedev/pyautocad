@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import optparse
 import os
 import sys
 import re
@@ -8,6 +9,7 @@ import logging
 
 from pyautocad import Autocad
 from pyautocad.utils import unformat_mtext, timing
+from pyautocad.contrib.excel import get_writer, available_formats
 
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -62,23 +64,36 @@ def get_cables(acad, known_targets):
 
 def main():
     acad = Autocad()
+    parser = optparse.OptionParser(usage=u'%prog [опции] [файл]')
+    parser.add_option('-f', '--format',
+                      choices=available_formats(), dest='format',
+                      metavar='FORMAT', default='xls',
+                      help=u"Формат файла (%s) по умолчанию - %%default" %
+                           ', '.join(available_formats()))
+    parser.add_option('-k', '--known',
+                      dest='known_targets', metavar='FILE',
+                      default="cables_known.csv",action='store',
+                      help=u'Файл с заполненым полем "Конец"')
+    parser.add_option('-q', '--quiet', action='callback',
+                      callback=lambda *x: logging.disable(logging.WARNING),
+                      help=u'"Тихий" режим')
 
-    known_targets_file = "cables_known.csv"
-    output_file = "cables_from_%s.csv" % acad.doc.Name
-    if len(sys.argv) > 1:  # TODO optparse
-        output_file = sys.argv[1]
-    elif len(sys.argv) == 3:
-        known_targets_file = sys.argv[2]
+    options, args = parser.parse_args()
+    output_file = args[0] if args else u"cables_from_%s.%s" % (acad.doc.Name, options.format)
+    known_targets_file = options.known_targets
     cables = get_cables(acad, get_known_targets(known_targets_file))
     # TODO sort based on known targets
     sorted_cables = sorted(cables, key=lambda x: (x[1], x[0]))
 
     # TODO save to .xls (option)
-    writer = csv.writer(open(output_file, "wb"), delimiter=';')
+    writer = get_writer(options.format)(output_file)
     for row in sorted_cables:
-        writer.writerow([s.encode("cp1251") for s in row])
+        writer.writerow([s for s in row])
+    writer.close()
 
 
 if __name__ == "__main__":
     with timing():
         main()
+
+# TODO append option

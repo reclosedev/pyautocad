@@ -46,10 +46,8 @@ class XlsWriter(object):
 _writers = {'csv': CsvWriter, 'xls': XlsWriter}
 
 
-def get_writer(format='csv'):
-    if format not in _writers:
-        raise RuntimeError('Unknown format')
-    return _writers[format]
+def get_writer(format='csv', default=None):
+    return _writers.get(format, default)
 
 
 def available_formats():
