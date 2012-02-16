@@ -27,7 +27,7 @@ def main():
     parser.add_option('-f', '--format',
                       choices=available_formats(), dest='format',
                       metavar='FMT', default='csv',
-                      help=u"Формат файла (%s) по умолчанию - csv" %
+                      help=u"Формат файла (%s) по умолчанию - %%default" %
                            ', '.join(available_formats()))
     parser.add_option('-m', '--model',
                       dest='include_model', default=False, action='store_true',

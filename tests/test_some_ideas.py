@@ -4,26 +4,21 @@
 import unittest
 
 from pyautocad import Autocad
+import tablib
 
+
+def sort_by_correct_order(messed_order, correct_order):
+    return [x for x in correct_order if x in messed_order] + \
+           [x for x in messed_order if x not in correct_order]
 
 class MyTestCase(unittest.TestCase):
-    def test_something(self):
-        self.assertEqual(True, True)
+    def test_sort_by_correct(self):
+        correct = ['TP', 'VRU', 'SHR', 'SHO', 'LAMP']
+        new_seq = ['SHR', 'VRU', 'LAMP', 'SHO', 'STANOK']
+        print sort_by_correct_order(new_seq, correct)
 
-def main():
-    acad = Autocad()
-    layout = acad.iter_layouts().next()
-    table = acad.iter_objects('table', layout.Block).next()
-    merged = set()
-    for row in range(3):
-        for col in range(table.Columns):
-            minRow, maxRow, minCol, maxCol, is_merged = table.IsMergedCell(row, col)
-            if is_merged:
-                merged.add((minRow, maxRow, minCol, maxCol,))
-            print is_merged
-            # print row, col, table.GetText(row, col), table.GetColumnWidth(col), table.GetDataFormat(row, col, 1000)
-        print
-    print merged
+    def test_tablib(self):
+        tablib.Dataset([1,2,3], [4,5,6])
 
 if __name__ == '__main__':
     unittest.main()
