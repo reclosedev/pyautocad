@@ -6,6 +6,31 @@ import pprint
 
 from pyautocad import Autocad, utils
 
+def print_table_info(table, print_rows=0):
+    merged = set()
+    column_widths = [round(table.GetColumnWidth(col), 2) for col in xrange(table.Columns)]
+    row_heights = [round(table.GetRowHeight(row), 2) for row in xrange(table.Rows)]
+    row_texts = []
+    for row in range(table.Rows):
+        columns = []
+        for col in range(table.Columns):
+            if print_rows > 0:
+                columns.append(table.GetText(row, col))
+            minRow, maxRow, minCol, maxCol, is_merged = table.IsMergedCell(row, col)
+            if is_merged:
+                merged.add((minRow, maxRow, minCol, maxCol,))
+        if print_rows > 0:
+            print_rows -= 1
+            row_texts.append(columns)
+
+    print 'row_heights = %s' % str(row_heights)
+    print 'column_widths = %s' % str(column_widths)
+    print 'merged_cells = %s' % pprint.pformat(list(merged))
+    if row_texts:
+        print 'content = ['
+        for row in row_texts:
+            print u"        [%s]," % u", ".join("u'%s'" % s for s in row)
+        print ']'
 
 def main():
     acad = Autocad()
@@ -13,25 +38,10 @@ def main():
     table = acad.find_one('table', layout.Block)
     if not table:
         return
-        
-    merged = set()
-    column_widths = [0] * table.Columns
-    row_heights = [0] * table.Rows
-    widths_gathered = False
-    
-    for row in range(table.Rows):
-        row_heights[row] = round(table.GetRowHeight(row), 2)
-        for col in range(table.Columns):
-            if not widths_gathered:
-                column_widths[col] = round(table.GetColumnWidth(col), 2)
-            minRow, maxRow, minCol, maxCol, is_merged = table.IsMergedCell(row, col)
-            if is_merged:
-                merged.add((minRow, maxRow, minCol, maxCol,))
-        widths_gathered = True
-    
-    print 'row_heights = %s' % str(row_heights)
-    print 'column_widths = %s' % str(column_widths)
-    print 'merged_cells = %s' % pprint.pformat(list(merged))
+    print_table_info(table, 3)
+
+
+
 
 if __name__ == '__main__':
     with utils.timing():
