@@ -20,8 +20,6 @@ class Autocad(object):
         self._open_if_not_run = create_if_not_exists
         self._visible = visible
         self._app = None
-        self._doc = None
-        self._model = None
 
     @property
     def app(self):
@@ -43,16 +41,14 @@ class Autocad(object):
     @property
     def doc(self):
         """ `ActiveDocument` """
-        if self._doc is None:
-            self._doc = self.app.ActiveDocument
-        return self._doc
+        return self.app.ActiveDocument
+        
 
     @property
     def model(self):
         """ `ModelSpace` from active document """
-        if self._model is None:
-            self._model = self.doc.ModelSpace
-        return self._model
+        return self.doc.ModelSpace
+        
 
     def iter_layouts(self, doc=None, skip_model=True):
         """Iterate layouts from `doc`
