@@ -3,9 +3,7 @@
 from collections import OrderedDict, namedtuple
 import optparse
 import os
-import sys
 import re
-import csv
 import logging
 
 
@@ -27,11 +25,10 @@ def get_known_targets(filename):
         logger.warning("Can't find file with known targets: %s", filename)
         return {}
     targets = OrderedDict()
-    reader = csv.reader(open(filename, "r"), delimiter=';')
-    for row in reader:
+    data = Table.data_from_file(filename)
+    for row in data:
         if len(row) < 3:
             continue
-        row = [x.decode('cp1251') for x in row]
         targets[row[0]] = row[2]
     return targets
 

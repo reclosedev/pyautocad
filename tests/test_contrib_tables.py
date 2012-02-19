@@ -33,7 +33,7 @@ class TableTestCase(unittest.TestCase):
         with self.assertRaises(tables.FormatNotSupported):
             t.save('tst', 'any_nonexistent')
         with self.assertRaises(tables.FormatNotSupported):
-            t = tables.Table.from_file('tst', 'any_nonexistent')
+            t = tables.Table.data_from_file('tst', 'any_nonexistent')
 
     def test_write_read_encoding(self):
         t = tables.Table()
@@ -41,11 +41,13 @@ class TableTestCase(unittest.TestCase):
         data = [row]
         t.writerow(row)
         #for fmt in tables.available_write_formats():
-        for fmt in ('csv', 'xls', 'json'):
+        for fmt in tables.available_read_formats():
             filename = 'test_hello.%s' % fmt
             t.save(filename, fmt)
-            t2 = tables.Table.from_file(filename, fmt)
-            self.assertEqual(t2.dataset.dict, data)
+            t2 = tables.Table.data_from_file(filename, fmt)
+            self.assertEqual(t2, data)
+            t2 = tables.Table.data_from_file(filename)
+            self.assertEqual(t2, data)
             os.remove(filename)
 
 if __name__ == '__main__':

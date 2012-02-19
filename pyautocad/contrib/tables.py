@@ -3,6 +3,7 @@
 #date: 15.02.12
 import csv
 import json
+import os
 
 import tablib
 import xlrd
@@ -49,12 +50,12 @@ class Table(object):
             writer.writerow(row)
 
     @staticmethod
-    def from_file(filename, fmt, csv_encoding='cp1251', csv_delimiter=';'):
+    def data_from_file(filename, fmt=None, csv_encoding='cp1251', csv_delimiter=';'):
+        if fmt is None:
+            fmt = os.path.splitext(filename)[1][1:]
         raw_data =  _TableImporter(csv_encoding=csv_encoding,
                                    csv_delimiter=csv_delimiter).import_table(filename, fmt)
-        table = Table()
-        table.dataset = tablib.Dataset(*raw_data)
-        return table
+        return raw_data
 
     @staticmethod
     def available_write_formats():
