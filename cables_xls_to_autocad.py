@@ -8,6 +8,7 @@ import xlrd
 
 from pyautocad import Autocad, ACAD, APoint
 from pyautocad.utils import timing
+from pyautocad.contrib.tables import Table
 
 
 HEADER_TEXT_HEIGHT = 3.5
@@ -47,18 +48,16 @@ def add_cables_list_to_autocad(block, data):
     add_pivot_table(block, insert_point, list(calc_pivot_tips(pivot_dcount)))
 
 
-def read_cables_from_xls(filename):  # TODO add csv support
-    book = xlrd.open_workbook(filename)
-    sheet = book.sheet_by_index(0)
-    for row in xrange(sheet.nrows):
+def read_cables_from_table(filename):
+    data = Table.data_from_file(filename)
+    for row in data:
         columns = []
-        for col in xrange(min(9, sheet.ncols)):
-            val = sheet.cell(row, col).value
+        for col in row:
             try:
-                text = unicode(int(val))
+                col = unicode(int(float(col))) # TODO HACK manipulate table format
             except ValueError:
-                text = unicode(val)
-            columns.append(text)
+                pass
+            columns.append(col)
         yield columns
 
 
@@ -204,7 +203,7 @@ def calc_pivot_tips(pivot_dcount):
 def main():
     filename = sys.argv[1] if sys.argv[1:] else 'cables_list.xls'
     acad = Autocad()
-    data = list(read_cables_from_xls(filename))
+    data = list(read_cables_from_table(filename))
     add_cables_list_to_autocad(acad.doc.ActiveLayout.Block, data)
 
 
