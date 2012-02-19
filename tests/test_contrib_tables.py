@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #date: 13.02.12
+import os
 import unittest
 
 from pyautocad.contrib import tables
@@ -26,20 +27,26 @@ class TableTestCase(unittest.TestCase):
         t.writerow([1]*3)
         self.assertEqual(t.dataset.dict, [[1]*3])
 
-    def test_table_save(self):
+    def test_table_unknown_format(self):
         t = tables.Table()
         t.writerow([1]*3)
         with self.assertRaises(tables.FormatNotSupported):
             t.save('tst', 'any_nonexistent')
+        with self.assertRaises(tables.FormatNotSupported):
+            t = tables.Table.from_file('tst', 'any_nonexistent')
 
-    def test_encoding_csv(self):
+    def test_write_read_encoding(self):
         t = tables.Table()
-        data = [u'Привет, мир', u'мир\ttabbed', 'some']
-        t.writerow(data)
-        for fmt in tables.available_formats():
+        row = [u'Привет, мир', u'мирtabbed', 'some']
+        data = [row]
+        t.writerow(row)
+        #for fmt in tables.available_formats():
+        for fmt in ('csv', 'xls', 'json'):
             filename = 'test_hello.%s' % fmt
-            t.save(filename, fmt, 'cp1251')
-
+            t.save(filename, fmt)
+            t2 = tables.Table.from_file(filename, fmt)
+            self.assertEqual(t2.dataset.dict, data)
+            os.remove(filename)
 
 if __name__ == '__main__':
     unittest.main()
