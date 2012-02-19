@@ -21,7 +21,20 @@ class TableTestCase(unittest.TestCase):
         t.writerow([3]*3)
         with self.assertRaises(tablib.InvalidDimensions):
             t.writerow([4]*4)
-        self.assertEqual(t._dataset.dict, [[1]*3, [2]*3, [3]*3])
+        self.assertEqual(t.dataset.dict, [[1]*3, [2]*3, [3]*3])
+
+    def test_table_save(self):
+        t = tables.Table()
+        t.writerow([1]*3)
+        with self.assertRaises(tables.FormatNotSupported):
+            t.save('tst', 'any_nonexistent')
+
+    def test_encoding_csv(self):
+        t = tables.Table()
+        t.writerow([u'Привет, мир', u'мир'])
+        print t.convert('csv')
+        for fmt in tables.available_formats():
+            t.save('test_hello.%s' % fmt, fmt, 'cp1251')
 
 
 if __name__ == '__main__':

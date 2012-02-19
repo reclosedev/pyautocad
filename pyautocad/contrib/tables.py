@@ -6,24 +6,44 @@ from cStringIO import StringIO
 
 import tablib
 
+class FormatNotSupported(Exception):
+    pass
 
 class Table(object):
+    _write_formats = set(['csv', 'xls', 'xlsx', 'yaml', 'json'])
+    _read_formats = _write_formats
 
     def __init__(self, ):
-        self._dataset = tablib.Dataset()
+        self.dataset = tablib.Dataset()
 
     def writerow(self, row):
-        self._dataset.append(row)
+        self.dataset.append(row)
+
+    def append(self, row):
+        self.writerow(row)
+
+    def clear(self):
+        self.dataset = tablib.Dataset()
 
     def save(self, filename, format, encoding=None):
         with open(filename, 'wb') as output:
-            output.write(getattr(self._dataset, format))
+            converted = self.convert(format)
+            if format == 'csv' and encoding:
+                converted = converted.decode('utf8').encode(encoding)
+            output.write(converted)
 
-_write_formats = set(['csv', 'xls', 'xlsx'])
-_read_formats = _write_formats
+    def convert(self, format):
+        if format not in self._write_formats:
+            raise FormatNotSupported('Unknown format: %s' % format)
+        return getattr(self.dataset, format)
 
-def available_formats():
-    return _write_formats
+    @staticmethod
+    def available_formats():
+        return Table._write_formats
+
+
+
+available_formats = Table.available_formats  # backward compatibility
 
 # TODO better interface
 # TODO xls reader
