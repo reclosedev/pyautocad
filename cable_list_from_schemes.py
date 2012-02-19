@@ -87,20 +87,25 @@ def main():
                       metavar='FORMAT', default='xls',
                       help=u"Формат файла (%s) по умолчанию - %%default" %
                            ', '.join(available_write_formats()))
-    parser.add_option('-k', '--known',
-                      dest='known_targets', metavar='FILE',
-                      default="cables_known.csv",action='store',
-                      help=u'Файл с заполненым полем "Конец". По умолчанию берется из существующего файла')
+    parser.add_option('-k', '--known', dest='known_targets',
+                      metavar='FILE', default='', action='store',
+                      help=u'Файл с заполненым полем "Конец" и очередностью '
+                           u' записей. По умолчанию берется из существующего файла')
     parser.add_option('-q', '--quiet', action='callback',
                       callback=lambda *x: logging.disable(logging.WARNING),
-                      help=u'"Тихий" режим')
+                      help=u'"Тихий" режим (не печатать в консоль)')
     parser.add_option('-s', '--single', dest='single_doc', action='store_true',
                       default=False,
                       help=u'Собрать данные только из текущего документа '
                            u'(Собирает из всех по умолчанию)')
+    parser.add_option('-c', '--no-known', dest='dont_use_known',
+                      action='store_true', default=False,
+                      help=u'Не использовать данные об очередности и поле "Конец"')
     options, args = parser.parse_args()
 
     output_file = args[0] if args else u"cables_from_%s.%s" % (acad.doc.Name, options.format)
+    if not options.known_targets and not options.dont_use_known:
+        options.known_targets = output_file
     known_targets = get_known_targets(options.known_targets)
     output_table = Table()
     if options.single_doc:
@@ -115,7 +120,7 @@ def main():
             for row in sorted_cables:
                 output_table.writerow([s for s in row])
         except Exception:
-            logger.error('Error while processing %s', doc.Name)  # TODO
+            logger.exception('Error while processing %s', doc.Name)
     output_table.save(output_file, options.format)
 
 
@@ -125,4 +130,3 @@ if __name__ == "__main__":
 
 # TODO append to existent file option
 # TODO atomic write
-# TODO sort by output file, if not empty
