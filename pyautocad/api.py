@@ -63,27 +63,27 @@ class Autocad(object):
                 continue
             yield layout
 
-    def iter_objects(self, object_name_or_list=None, container=None,
+    def iter_objects(self, object_name_or_list=None, block=None,
                      limit=None, dont_cast=False):
-        """Iterate objects from `container`
+        """Iterate objects from `block`
 
           `object_name_or_list` - part of object type name, or list of it
-          `container` - Autocad container, default - `ActiveLayout.Block`
+          `block` - Autocad block, default - `ActiveLayout.Block`
           `limit` - max number of objects to return, default infinite
           `dont_cast` - Don't retrieve best interface for object, may speedup
                         iteration. Returned objects should be casted by caller
         """
-        if container is None:
-            container = self.doc.ActiveLayout.Block
+        if block is None:
+            block = self.doc.ActiveLayout.Block
         object_names = object_name_or_list
         if object_names:
             if isinstance(object_names, basestring):
                 object_names = [object_names]
             object_names = [n.lower() for n in object_names]
 
-        count = container.Count
+        count = block.Count
         for i in xrange(count):
-            item = container.Item(i)  # it's faster than `for item in container`
+            item = block.Item(i)  # it's faster than `for item in block`
             if limit and i >= limit:
                 return
             if object_names:

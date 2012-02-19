@@ -18,7 +18,10 @@ class MyTestCase(unittest.TestCase):
         print sort_by_correct_order(new_seq, correct)
 
     def test_tablib(self):
-        tablib.Dataset([1,2,3], [4,5,6])
+        d = tablib.Dataset([1,2,3], [4,5,6])
+        with self.assertRaises(tablib.InvalidDimensions):
+            d.append([1,2,3,4,5])
+
 
 if __name__ == '__main__':
     unittest.main()

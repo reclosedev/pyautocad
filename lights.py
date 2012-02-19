@@ -12,7 +12,7 @@ LampEntry = namedtuple('LampEntry', 'number, mark, numxpower')
 
 # \A1;2ARCTIC SMC/SAN 254 \S2х54/2,5;\P300 лк
 def iter_lamps(acad, objects):
-    for obj in acad.iter_objects(('MText', 'MLeader'), container=objects):
+    for obj in acad.iter_objects(('MText', 'MLeader'), block=objects):
         try:
             text = obj.TextString
         except Exception:
