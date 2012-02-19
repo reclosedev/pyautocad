@@ -18,10 +18,13 @@ class TableTestCase(unittest.TestCase):
         t = tables.Table()
         t.writerow([1]*3)
         t.writerow([2]*3)
-        t.writerow([3]*3)
+        t.append([3]*3)
         with self.assertRaises(tablib.InvalidDimensions):
             t.writerow([4]*4)
         self.assertEqual(t.dataset.dict, [[1]*3, [2]*3, [3]*3])
+        t.clear()
+        t.writerow([1]*3)
+        self.assertEqual(t.dataset.dict, [[1]*3])
 
     def test_table_save(self):
         t = tables.Table()
@@ -31,10 +34,11 @@ class TableTestCase(unittest.TestCase):
 
     def test_encoding_csv(self):
         t = tables.Table()
-        t.writerow([u'Привет, мир', u'мир'])
-        print t.convert('csv')
+        data = [u'Привет, мир', u'мир\ttabbed', 'some']
+        t.writerow(data)
         for fmt in tables.available_formats():
-            t.save('test_hello.%s' % fmt, fmt, 'cp1251')
+            filename = 'test_hello.%s' % fmt
+            t.save(filename, fmt, 'cp1251')
 
 
 if __name__ == '__main__':

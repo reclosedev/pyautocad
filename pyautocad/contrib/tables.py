@@ -27,15 +27,21 @@ class Table(object):
 
     def save(self, filename, format, encoding=None):
         with open(filename, 'wb') as output:
-            converted = self.convert(format)
-            if format == 'csv' and encoding:
-                converted = converted.decode('utf8').encode(encoding)
-            output.write(converted)
+            if encoding is not None and format == 'csv':
+                self.to_csv(output, encoding)
+            else:
+                output.write(self.convert(format))
 
     def convert(self, format):
         if format not in self._write_formats:
             raise FormatNotSupported('Unknown format: %s' % format)
         return getattr(self.dataset, format)
+
+    def to_csv(self, stream, encoding='cp1251', delimiter=';', **kwargs):
+        writer = csv.writer(stream, delimiter=delimiter, **kwargs)
+        for row in self.dataset.dict:
+            row = [c.encode(encoding) for c in row]
+            writer.writerow(row)
 
     @staticmethod
     def available_formats():
