@@ -40,7 +40,7 @@ class TableTestCase(unittest.TestCase):
         row = [u'Привет, мир', u'мирtabbed', 'some']
         data = [row]
         t.writerow(row)
-        #for fmt in tables.available_formats():
+        #for fmt in tables.available_write_formats():
         for fmt in ('csv', 'xls', 'json'):
             filename = 'test_hello.%s' % fmt
             t.save(filename, fmt)

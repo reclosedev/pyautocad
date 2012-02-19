@@ -3,7 +3,7 @@
 import optparse
 
 from pyautocad import Autocad, utils
-from pyautocad.contrib.tables import Table, available_formats
+from pyautocad.contrib.tables import Table, available_write_formats
 
 
 def iter_cable_tables(acad, block):
@@ -25,10 +25,10 @@ def extract_tables_from_dwg(acad, writer, skip_model=True):
 def main():
     parser = optparse.OptionParser()
     parser.add_option('-f', '--format',
-                      choices=available_formats(), dest='format',
+                      choices=available_write_formats(), dest='format',
                       metavar='FMT', default='csv',
                       help=u"Формат файла (%s) по умолчанию - %%default" %
-                           ', '.join(available_formats()))
+                           ', '.join(available_write_formats()))
     parser.add_option('-m', '--model',
                       dest='include_model', default=False, action='store_true',
                       help=u"Включить пространство Модели в область поиска")

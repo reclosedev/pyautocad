@@ -11,7 +11,7 @@ import logging
 
 from pyautocad import Autocad
 from pyautocad.utils import unformat_mtext, timing
-from pyautocad.contrib.tables import Table, available_formats
+from pyautocad.contrib.tables import Table, available_write_formats
 
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -86,10 +86,10 @@ def main():
     acad = Autocad()
     parser = optparse.OptionParser(usage=u'%prog [опции] [файл для результатов]')
     parser.add_option('-f', '--format',
-                      choices=available_formats(), dest='format',
+                      choices=available_write_formats(), dest='format',
                       metavar='FORMAT', default='xls',
                       help=u"Формат файла (%s) по умолчанию - %%default" %
-                           ', '.join(available_formats()))
+                           ', '.join(available_write_formats()))
     parser.add_option('-k', '--known',
                       dest='known_targets', metavar='FILE',
                       default="cables_known.csv",action='store',

@@ -57,8 +57,12 @@ class Table(object):
         return table
 
     @staticmethod
-    def available_formats():
+    def available_write_formats():
         return list(Table._write_formats)
+
+    @staticmethod
+    def available_read_formats():
+        return list(Table._read_formats)
 
 
 class _TableImporter(object):
@@ -94,8 +98,6 @@ class _TableImporter(object):
     def read_json(self, stream):
         return json.load(stream)
 
-available_formats = Table.available_formats  # backward compatibility
+available_write_formats = Table.available_write_formats  # backward compatibility
+available_read_formats = Table.available_read_formats
 
-# TODO better interface
-# TODO xls reader
-# TODO use tablib
