@@ -11,7 +11,7 @@ import logging
 
 from pyautocad import Autocad
 from pyautocad.utils import unformat_mtext, timing
-from pyautocad.contrib.excel import get_writer, available_formats
+from pyautocad.contrib.tables import Table, available_formats
 
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -105,7 +105,7 @@ def main():
 
     output_file = args[0] if args else u"cables_from_%s.%s" % (acad.doc.Name, options.format)
     known_targets = get_known_targets(options.known_targets)
-    writer = get_writer(options.format)(output_file)
+    output_table = Table()
     if options.single_doc:
         documents = [acad.doc]
     else:
@@ -116,10 +116,10 @@ def main():
             cables = get_cables(acad, doc.Modelspace, known_targets)
             sorted_cables = sort_cables_by_targets(cables, known_targets)
             for row in sorted_cables:
-                writer.writerow([s for s in row])
+                output_table.writerow([s for s in row])
         except Exception:
             logger.error('Error while processing %s', doc.Name)  # TODO
-    writer.close()
+    output_table.save(output_file, options.format)
 
 
 if __name__ == "__main__":

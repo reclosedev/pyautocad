@@ -3,7 +3,7 @@
 import optparse
 
 from pyautocad import Autocad, utils
-from pyautocad.contrib.excel import get_writer, available_formats
+from pyautocad.contrib.tables import Table, available_formats
 
 
 def iter_cable_tables(acad, block):
@@ -35,10 +35,11 @@ def main():
 
     options, args = parser.parse_args()
     acad = Autocad()
-    filename = args[0] if args else 'kab_list.%s' % options.format
-    writer = get_writer(options.format)(filename)
-    extract_tables_from_dwg(acad, writer, not options.include_model)
-    writer.close()
+    filename = args[0] if args else u"cab_list_from_%s.%s" % (acad.doc.Name,
+                                                              options.format)
+    output_table = Table()
+    extract_tables_from_dwg(acad, output_table, not options.include_model)
+    output_table.save(filename, options.format)
 
 if __name__ == '__main__':
     with utils.timing():

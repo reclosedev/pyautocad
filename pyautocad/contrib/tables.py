@@ -25,7 +25,7 @@ class Table(object):
     def clear(self):
         self.dataset = tablib.Dataset()
 
-    def save(self, filename, format, encoding=None):
+    def save(self, filename, format, encoding='cp1251'):
         with open(filename, 'wb') as output:
             if encoding is not None and format == 'csv':
                 self.to_csv(output, encoding)
@@ -45,7 +45,7 @@ class Table(object):
 
     @staticmethod
     def available_formats():
-        return Table._write_formats
+        return list(Table._write_formats)
 
 
 
