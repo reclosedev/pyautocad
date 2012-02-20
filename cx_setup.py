@@ -6,13 +6,14 @@ import sys
 
 from cx_Freeze import setup, Executable
 
-
-#sys.argv.append('install_exe')
-sys.argv.append('build_exe')
+if not len(sys.argv[1:]):
+    sys.argv.append('install_exe')
+    #sys.argv.append('build_exe')
 
 install_exe_options = {'install_dir': './Autocad tools'}
-build_exe_options = {'excludes': ['bz2', '_hashlib', 'unittest'], # TODO Experimental
-                     'includes': ['xlwt']}
+build_exe_options = {'excludes': ['bz2', '_hashlib', 'unittest'
+                                   'tests'],} # TODO Experimental
+                     
 
 exclude_scripts = ['cx_setup.py']
 scripts_to_build = [name for name in glob.glob('*.py') if
