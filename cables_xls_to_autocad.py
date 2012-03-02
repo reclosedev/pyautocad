@@ -171,7 +171,7 @@ def calc_pivot_table(data, value_extractor=length_pivot):
             return section  # so return untouched (will be on top)
         section = normalize_section(section)
         return map(lambda x: try_convert(x, float), section.split('x'))
-    cable_sections = sorted(cable_sections, key=sections_key, reverse=True)
+    cable_sections = sorted(cable_sections, key=sections_key)
 
     yield [u'Cечение'] + list(sorted(cable_types))
     for cable_section in cable_sections:
@@ -193,7 +193,7 @@ def calc_pivot_tips(pivot_dcount):
         section = normalize_section(section)
         count_sect = map(lambda x: try_convert(x, float), section.split('x', 2))  # TODO buggy
         if len(count_sect) == 2:
-            result[count_sect[1]] += int(count_sect[0] * count_sect[1])
+            result[count_sect[1]] += int(count_sect[0] * count)
 
     yield u'Сечение', u'Кол-во наконечников'
     for sect in sorted(result.keys()):
