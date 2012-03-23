@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #date: 14.02.12
+"""
+Converts example scripts to Windows executables
+"""
 import glob
 import sys
 
@@ -15,8 +18,8 @@ build_exe_options = {'excludes': ['bz2', '_hashlib', 'unittest'
                                    'tests'],} # TODO Experimental
                      
 
-exclude_scripts = ['cx_setup.py']
-scripts_to_build = [name for name in glob.glob('*.py') if
+exclude_scripts = ['cx_setup.py', '__init__.py']
+scripts_to_build = [name for name in glob.glob('examples/*.py') if
                     name not in exclude_scripts]
 
 setup(name="Autocad tools",
