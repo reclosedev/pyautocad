@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name = "pyautocad",
-    packages = ["pyautocad", "pyautocad.contrib", "tests"],
+    packages = ["pyautocad", "pyautocad.contrib"],
     version = "0.1.0",
     description = "AutoCAD Automation for Python",
     author = "Roman Haritonov",
@@ -54,5 +54,6 @@ Example code::
         # p = APoint(mtext.InsertionPoint)
         # p.x += 10
         # mtext.InsertionPoint = p
+
 """
 )

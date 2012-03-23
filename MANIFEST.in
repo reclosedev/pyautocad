@@ -1,6 +1,6 @@
-include LICENSE.txt AUTHORS
+include LICENSE.txt AUTHORS README.rst
 include *.py
-recursive-include examples *
-recursive-exclude examples *.pyc
-recursive-exclude examples *.pyo
+recursive-include tests *.py
+recursive-include examples *.py
+
 
