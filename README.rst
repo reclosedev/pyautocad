@@ -1,4 +1,4 @@
-pyautoacad - AutoCAD Automation for python
+pyautoacad - AutoCAD Automation for Python
 ------------------------------------------
 
 Example code::
