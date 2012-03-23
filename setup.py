@@ -4,14 +4,19 @@ from distutils.core import setup
 
 setup(
     name = "pyautocad",
-    packages = ["pyautocad"],
+    packages = ["pyautocad", "pyautocad.contrib", "tests"],
     version = "0.1.0",
     description = "AutoCAD Automation for python",
     author = "Roman Haritonov",
     author_email = "reclosedev@gmail.com",
     url = "https://bitbucket.org/reclosedev/pyautocad",
     download_url = "https://bitbucket.org/reclosedev/pyautocad/get/582e0cf418d6.zip",
+    install_requires=[
+        'comtypes>=0.6.2',
+    ],
     keywords = ["autocad", "automation", "activex", "comtypes"],
+    license = "BSD License",
+    include_package_data=True,
     classifiers = [
         "Programming Language :: Python",
         "License :: OSI Approved :: BSD License",

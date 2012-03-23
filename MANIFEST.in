@@ -1,0 +1,6 @@
+include LICENSE.txt AUTHORS
+include *.py
+recursive-include examples *
+recursive-exclude examples *.pyc
+recursive-exclude examples *.pyo
+
