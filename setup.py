@@ -30,7 +30,7 @@ setup(
 pyautoacad - AutoCAD Automation for python
 ------------------------------------------
 
-Example code:
+Example code::
 
     from pyautocad import Autocad
     from pyautocad import APoint

@@ -1,7 +1,7 @@
 pyautoacad - AutoCAD Automation for python
 ------------------------------------------
 
-Example code:
+Example code::
 
     from pyautocad import Autocad
     from pyautocad import APoint
@@ -25,3 +25,5 @@ Example code:
         # p = APoint(mtext.InsertionPoint)
         # p.x += 10
         # mtext.InsertionPoint = p
+
+TBD
