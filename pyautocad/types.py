@@ -25,11 +25,11 @@ class APoint(array.array):
 
     @property
     def y(self):
-        return self[0]
+        return self[1]
 
     @y.setter
     def y(self, value):
-        self[0] = value
+        self[1] = value
 
     @property
     def z(self):
