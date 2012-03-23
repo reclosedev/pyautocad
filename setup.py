@@ -6,11 +6,10 @@ setup(
     name = "pyautocad",
     packages = ["pyautocad", "pyautocad.contrib", "tests"],
     version = "0.1.0",
-    description = "AutoCAD Automation for python",
+    description = "AutoCAD Automation for Python",
     author = "Roman Haritonov",
     author_email = "reclosedev@gmail.com",
     url = "https://bitbucket.org/reclosedev/pyautocad",
-    download_url = "https://bitbucket.org/reclosedev/pyautocad/get/0.1.0.zip",
     install_requires=[
         'comtypes>=0.6.2',
     ],
@@ -27,7 +26,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering",
         ],
-    long_description = """\
+    long_description = """
 pyautoacad - AutoCAD Automation for python
 ------------------------------------------
 
@@ -37,7 +36,7 @@ Example code:
     from pyautocad import APoint
 
     acad = Autocad()
-    acad.prompt("Hello, Autocad from Python\n")
+    acad.prompt("Hello, Autocad from Python\\n")
     print acad.doc.Name
 
     p1 = APoint(0, 0)
