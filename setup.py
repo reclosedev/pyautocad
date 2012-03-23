@@ -10,7 +10,7 @@ setup(
     author = "Roman Haritonov",
     author_email = "reclosedev@gmail.com",
     url = "https://bitbucket.org/reclosedev/pyautocad",
-    download_url = "https://bitbucket.org/reclosedev/pyautocad/get/582e0cf418d6.zip",
+    download_url = "https://bitbucket.org/reclosedev/pyautocad/get/0.1.0.zip",
     install_requires=[
         'comtypes>=0.6.2',
     ],
@@ -47,14 +47,11 @@ Example code:
     p2 = APoint(0, 0)
     acad.model.AddLine(p2, p2 + APoint(0, 100))
 
-
     dp = APoint(10, 0)
     for mtext in acad.iter_objects('MText'):
         print mtext.TextString, mtext.InsertionPoint
         mtext.InsertionPoint = APoint(mtext.InsertionPoint) + dp
-        #
         # or
-        #
         # p = APoint(mtext.InsertionPoint)
         # p.x += 10
         # mtext.InsertionPoint = p
