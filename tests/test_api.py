@@ -26,7 +26,6 @@ class ApiTestCase(unittest.TestCase):
     def tearDown(self):
         self.doc.Close(False)
         pass
-        
 
     def test_points_arguments(self):
         model = self.acad.model
@@ -38,8 +37,7 @@ class ApiTestCase(unittest.TestCase):
         for circle in self.acad.iter_objects('circle'):
             cp = APoint(circle.Center)
             model.AddCircle(-cp, circle.Radius)
-            #print -cp
-        #print c1.Center
+
 
     def test_types(self):
         model = self.acad.model
@@ -100,6 +98,16 @@ class ApiTestCase(unittest.TestCase):
         self.assertEqual(lines_count, n_lines)
         self.assertEqual(texts_count, n_texts)
         self.assertEqual(all_count, n_lines + n_texts)
+
+    def test_find_objects(self):
+        p1 = APoint(0, 0)
+        model = self.acad.model
+        for i in range(5):
+            text = model.AddText(u'test %s' % i, p1, 2.5)
+        def text_contains_3(text_obj):
+            return '3' in text_obj.TextString
+        text = self.acad.find_one('Text', predicate=text_contains_3)
+        self.assertEqual(text.TextString, 'test 3')
 
 if __name__ == '__main__':
     unittest.main()
