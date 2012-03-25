@@ -7,16 +7,49 @@ import math
 
 
 class APoint(array.array):
+    """ 3D point with basic geometric operations and support for passing as a
+        parameter for `AutoCAD` Automation functions
+
+    Usage::
+
+        >>> p1 = APoint(10, 10)
+        >>> p2 = APoint(20, 20)
+        >>> p1 + p2
+        APoint(30.00, 30.00, 0.00)
+
+    Also it supports iterable as parameter::
+
+        >>> APoint([10, 20, 30])
+        APoint(10.00, 20.00, 30.00)
+        >>> APoint(range(3))
+        APoint(0.00, 1.00, 2.00)
+
+    Supported math operations: `+` `-` `*` `/`, `+=` `-=` `*=` `/=`::
+
+        >>> p = APoint(10, 10)
+        >>> p + 10
+        APoint(20.00, 20.00, 10.00)
+        >>> p * 2
+        APoint(20.00, 20.00, 0.00)
+        >>> p -= 1
+        >>> p
+        APoint(9.00, 9.00, -1.00)
+
+    It can be converted to `tuple` or `list`::
+
+        >>> tuple(APoint(1, 1, 1))
+        (1.0, 1.0, 1.0)
+
+    """
     def __new__(cls, x_or_seq, y=0.0, z=0.0):
         if isinstance(x_or_seq, (array.array, list, tuple)) and len(x_or_seq) == 3:
             return super(APoint, cls).__new__(cls, 'd', x_or_seq)
         return super(APoint, cls).__new__(cls, 'd', (x_or_seq, y, z))
 
-    def distance_to(self, other):
-        return distance(self, other)
 
     @property
     def x(self):
+        """ x coordinate of 3D point"""
         return self[0]
 
     @x.setter
@@ -25,6 +58,7 @@ class APoint(array.array):
 
     @property
     def y(self):
+        """ y coordinate of 3D point"""
         return self[1]
 
     @y.setter
@@ -33,11 +67,19 @@ class APoint(array.array):
 
     @property
     def z(self):
+        """ z coordinate of 3D point"""
         return self[2]
 
     @z.setter
     def z(self, value):
         self[2] = value
+
+    def distance_to(self, other):
+        """ Returns distance to `other` point
+
+        :param other: :class:`APoint` instance or any sequence of 3 points
+        """
+        return distance(self, other)
 
     def __add__(self, other):
         return self.__left_op(self, other, operator.add)
@@ -100,20 +142,27 @@ class APoint(array.array):
 
 
 def distance(p1, p2):
+    """ Returns distance between two points `p1` and `p2`
+    """
     return math.sqrt((p1[0] - p2[0]) ** 2 +
                      (p1[1] - p2[1]) ** 2 +
                      (p1[2] - p2[2]) ** 2)
 
-
 def aDouble(*seq):
+    """ Returns :class:`array.array` of doubles ('d' code) for passing to AutoCAD
+    """
     return _sequence_to_comtypes('d', *seq)
 
 
 def aInt(*seq):
+    """ Returns :class:`array.array` of ints ('l' code) for passing to AutoCAD
+    """
     return _sequence_to_comtypes('l', *seq)
 
 
 def aShort(*seq):
+    """ Returns :class:`array.array` of shorts ('h' code) for passing to AutoCAD
+    """
     return _sequence_to_comtypes('h', *seq)
 
 

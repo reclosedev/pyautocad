@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #date: 16.01.12
-import logging
+__all__ = ['Autocad', 'ACAD']
 
+import logging
 import comtypes
+#: constants from AutoCAD type library
 import comtypes.gen.AutoCAD as ACAD
 import pyautocad.types
 
-__all__ = ['Autocad', 'ACAD']
 
 logger = logging.getLogger(__name__)
 
@@ -17,22 +18,27 @@ class Autocad(object):
     """
 
     def __init__(self, create_if_not_exists=False, visible=True):
-        self._open_if_not_run = create_if_not_exists
+        """
+        :param create_if_not_exists: if AutoCAD doesn't run, then
+                                     new instanse will be crated
+        :param visible: new AutoCAD instance will be visible if True (default)
+        """
+        self._create_if_not_exists = create_if_not_exists
         self._visible = visible
         self._app = None
 
     @property
     def app(self):
-        """active `AutoCAD.Application`
+        """Returns active :class:`AutoCAD.Application`
 
-        if `Autocad` was created with `create_if_not_exists=True`,
-        it will create`AutoCAD.Application` if there is no active one
+        if :class:`Autocad` was created with :data:`create_if_not_exists=True`,
+        it will create :class:`AutoCAD.Application` if there is no active one
         """
         if self._app is None:
             try:
                 self._app = comtypes.client.GetActiveObject('AutoCAD.Application')
             except WindowsError:
-                if not self._open_if_not_run:
+                if not self._create_if_not_exists:
                     raise
                 self._app = comtypes.client.CreateObject('AutoCAD.Application')
                 self._app.Visible = self._visible
@@ -40,21 +46,25 @@ class Autocad(object):
 
     @property
     def doc(self):
-        """ `ActiveDocument` """
+        """ Returns `ActiveDocument` of current :attr:`Application`"""
         return self.app.ActiveDocument
-        
+
+    #: Synonym for :attr:`doc`
+    ActiveDocument = doc
+
+    #: Synonym for :attr:`app`
+    Application = app
 
     @property
     def model(self):
         """ `ModelSpace` from active document """
         return self.doc.ModelSpace
-        
 
     def iter_layouts(self, doc=None, skip_model=True):
-        """Iterate layouts from `doc`
+        """Iterate layouts from *doc*
 
-        If `doc=None` (default), `ActiveDocument` used
-        `skip_model` omit `ModelSpace` if `True`
+        :param doc: document to iterate layouts from if `doc=None` (default), :attr:`ActiveDocument` is used
+        :param skip_model: don't include :class:`ModelSpace` if `True`
         """
         if doc is None:
             doc = self.doc
@@ -67,11 +77,11 @@ class Autocad(object):
                      limit=None, dont_cast=False):
         """Iterate objects from `block`
 
-          `object_name_or_list` - part of object type name, or list of it
-          `block` - Autocad block, default - `ActiveLayout.Block`
-          `limit` - max number of objects to return, default infinite
-          `dont_cast` - Don't retrieve best interface for object, may speedup
-                        iteration. Returned objects should be casted by caller
+        :param object_name_or_list: part of object type name, or list of it
+        :param block: Autocad block, default - :class:`ActiveDocument.ActiveLayout.Block`
+        :param limit: max number of objects to return, default infinite
+        :param dont_cast: don't retrieve best interface for object, may speedup
+                          iteration. Returned objects should be casted by caller
         """
         if block is None:
             block = self.doc.ActiveLayout.Block
@@ -94,15 +104,23 @@ class Autocad(object):
                 item = self.best_interface(item)
             yield item
 
-    def iter_objects_fast(self, object_name=None, container=None, limit=None):
+    def iter_objects_fast(self, object_name_or_list=None, container=None, limit=None):
         """Shortcut for `iter_objects(dont_cast=True)`
         """
-        return self.iter_objects(object_name, container, limit, dont_cast=True)
+        return self.iter_objects(object_name_or_list, container, limit, dont_cast=True)
 
-    def find_one(self, object_name, container=None, predicate=None):
+    def find_one(self, object_name_or_list, container=None, predicate=None):
+        """Returns first occurance of object which match `predicate`
+
+        :param object_name_or_list: like in :meth:`iter_objects`
+        :param container: like in :meth:`iter_objects`
+        :param predicate: callable, which accepts object as argument
+                          and return `True` or `False`
+
+        """
         if predicate is None:
             predicate = bool
-        for obj in self.iter_objects(object_name, container):
+        for obj in self.iter_objects(object_name_or_list, container):
             if predicate(obj):
                 return obj
         return None
@@ -112,10 +130,16 @@ class Autocad(object):
         return comtypes.client.GetBestInterface(obj)
 
     def prompt(self, text):
-        print text
+        """ Prints text in console and in AutoCAD prompt
+        """
+        print(text)
         self.doc.Utility.Prompt(u"%s\n" % text)
 
-    def get_selection(self, text):
+    def get_selection(self, text="Select objects"):
+        """ Asks user to select objects
+
+        :param text: prompt for selection
+        """
         self.prompt(text)
         try:
             self.doc.SelectionSets.Item("SS1").Delete()
@@ -130,12 +154,3 @@ class Autocad(object):
     aInt = staticmethod(pyautocad.types.aInt)
     aShort = staticmethod(pyautocad.types.aShort)
 
-
-if __name__ == '__main__':
-    acad = Autocad()
-    text = 'Line1\nLine2\nLine3\n\n\nBackslash\\ and \\P {}'
-    from pyautocad.utils import string_to_mtext
-    acad.model.AddMText(acad.aDouble(0, 0, 0), 10, string_to_mtext(text))
-
-    for t in acad.iter_objects('mtext'):
-        print t.TextString

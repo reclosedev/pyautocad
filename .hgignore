@@ -5,3 +5,5 @@ syntax: glob
 *.jpg
 *.JPG
 build
+dist
+MANIFEST

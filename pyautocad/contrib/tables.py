@@ -12,22 +12,58 @@ class FormatNotSupported(Exception):
     pass
 
 class Table(object):
+    """ Represents table with ability to import and export data to following formats:
+
+    - csv
+    - xls
+    - xlsx (write only)
+    - json
+
+    When you need to store some data, it can be done as follows::
+
+        table = Table()
+        for i in range(5):
+            table.writerow([i, i, i])
+
+        table.save('data.xls', 'xls')
+
+    To import data from file, use :meth:`data_from_file`::
+
+        data = Table.data_from_file('data.xls')
+
+    """
+
     _write_formats = set(['csv', 'xls', 'xlsx', 'json'])
     _read_formats = _write_formats - set(['xlsx'])
 
-    def __init__(self, ):
+    def __init__(self):
         self.dataset = tablib.Dataset()
 
     def writerow(self, row):
+        """ Add `row` to table
+
+        :param row: row to add
+        :type row: sequence as list or tuple
+        """
         self.dataset.append(row)
 
     def append(self, row):
+        """ Synonym for :meth:`writerow`
+        """
         self.writerow(row)
 
     def clear(self):
+        """ Clear current table
+        """
         self.dataset = tablib.Dataset()
 
     def save(self, filename, fmt, encoding='cp1251'):
+        """ Save data to file
+
+        :param filename: path to file
+        :param fmt: data format (one of supported, e.g. 'xls', 'csv'
+        :param encoding: encoding for 'csv' format
+        """
         self._raise_if_bad_format(fmt)
         with open(filename, 'wb') as output:
             if encoding is not None and fmt == 'csv':
@@ -36,6 +72,14 @@ class Table(object):
                 output.write(self.convert(fmt))
 
     def convert(self, fmt):
+        """ Return data, converted to format
+
+        :param fmt: desirable format of data
+
+        **Note**: to convert to `csv` format, use :meth:`to_csv`
+
+        See also :meth:`available_write_formats`
+        """
         self._raise_if_bad_format(fmt)
         return getattr(self.dataset, fmt)
 
@@ -44,6 +88,13 @@ class Table(object):
             raise FormatNotSupported('Unknown format: %s' % fmt)
 
     def to_csv(self, stream, encoding='cp1251', delimiter=';', **kwargs):
+        """ Writes data in `csv` format to stream
+
+        :param stream: stream to write data to
+        :param encoding: output encoding
+        :param delimiter: `csv` delimiter
+        :param kwargs: additional parameters for :class:`csv.writer`
+        """
         writer = csv.writer(stream, delimiter=delimiter, **kwargs)
         for row in self.dataset.dict:
             row = [c.encode(encoding) for c in row]
@@ -51,6 +102,16 @@ class Table(object):
 
     @staticmethod
     def data_from_file(filename, fmt=None, csv_encoding='cp1251', csv_delimiter=';'):
+        """ Returns data in desired format from file
+
+        :param filename: path to file with data
+        :param fmt: format of file, if it's `None`, then it tries to guess format
+                    from `filename` extension
+        :param csv_encoding: encoding for `csv` data
+        :param csv_delimiter: delimiter for `csv` data
+
+        Format should be in :meth:`available_read_formats`
+        """
         if fmt is None:
             fmt = os.path.splitext(filename)[1][1:]
         raw_data =  _TableImporter(csv_encoding=csv_encoding,
@@ -59,6 +120,7 @@ class Table(object):
 
     @staticmethod
     def available_write_formats():
+
         return list(Table._write_formats)
 
     @staticmethod

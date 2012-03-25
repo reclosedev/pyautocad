@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from pyautocad import Autocad
-from pyautocad import APoint
+from pyautocad import Autocad, APoint
 
 acad = Autocad()
 acad.prompt("Hello, Autocad from Python\n")
