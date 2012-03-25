@@ -49,10 +49,10 @@ class Autocad(object):
         """ Returns `ActiveDocument` of current :attr:`Application`"""
         return self.app.ActiveDocument
 
-    #: Synonym for :attr:`doc`
+    #: Same as :attr:`doc`
     ActiveDocument = doc
 
-    #: Synonym for :attr:`app`
+    #: Same as :attr:`app`
     Application = app
 
     @property
@@ -106,6 +106,8 @@ class Autocad(object):
 
     def iter_objects_fast(self, object_name_or_list=None, container=None, limit=None):
         """Shortcut for `iter_objects(dont_cast=True)`
+
+        Shouldn't be used in normal situations
         """
         return self.iter_objects(object_name_or_list, container, limit, dont_cast=True)
 
@@ -115,8 +117,8 @@ class Autocad(object):
         :param object_name_or_list: like in :meth:`iter_objects`
         :param container: like in :meth:`iter_objects`
         :param predicate: callable, which accepts object as argument
-                          and return `True` or `False`
-
+                          and returns `True` or `False`
+        :returns: Object if found, else `None`
         """
         if predicate is None:
             predicate = bool
@@ -130,7 +132,7 @@ class Autocad(object):
         return comtypes.client.GetBestInterface(obj)
 
     def prompt(self, text):
-        """ Prints text in console and in AutoCAD prompt
+        """ Prints text in console and in `AutoCAD` prompt
         """
         print(text)
         self.doc.Utility.Prompt(u"%s\n" % text)
@@ -150,7 +152,10 @@ class Autocad(object):
         selection.SelectOnScreen()
         return selection
 
+    #: shortcut for :func:`pyautocad.types.aDouble`
     aDouble = staticmethod(pyautocad.types.aDouble)
+    #: shortcut for :func:`pyautocad.types.aInt`
     aInt = staticmethod(pyautocad.types.aInt)
+    #: shortcut for :func:`pyautocad.types.aShort`
     aShort = staticmethod(pyautocad.types.aShort)
 

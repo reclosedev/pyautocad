@@ -6,15 +6,16 @@
 Welcome to pyautocad's documentation!
 =====================================
 
+pyautocad_ - library aimed to simplify writing ActiveX_ Automation_ scripts for AutoCAD_ with Python
+
 Contents:
 
 .. toctree::
     :maxdepth: 2
 
     gettingstarted
+    usage
     api
-    test
-
 
 
 Indices and tables
@@ -23,4 +24,10 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. _pyautocad: http://pypi.python.org/pypi/pyautocad/
+.. _ActiveX: http://wikipedia.org/wiki/ActiveX
+.. _Automation: http://en.wikipedia.org/wiki/OLE_Automation
+.. _AutoCAD: http://wikipedia.org/wiki/AutoCAD
+
 

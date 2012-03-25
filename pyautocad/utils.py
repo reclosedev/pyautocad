@@ -8,11 +8,18 @@ from contextlib import contextmanager
 
 
 def unformat_mtext(s, exclude_list=('P', 'S')):
-    """Remove format information from string
+    """Returns string with removed format information
 
     :param s: string with multitext
     :param exclude_list: don't touch tags from this list. Default ('P', 'S') for
                          newline and fractions
+
+    ::
+
+        >>> text = ur'{\\fGOST type A|b0|i0|c204|p34;TEST\\fGOST type A|b0|i0|c0|p34;123}'
+        >>> unformat_mtext(text)
+        u'TEST123'
+
     """
     s = re.sub(r'\{?\\[^%s][^;]+;' % ''.join(exclude_list), '', s)
     s = re.sub(r'\}', '', s)
@@ -20,8 +27,18 @@ def unformat_mtext(s, exclude_list=('P', 'S')):
 
 
 def mtext_to_string(s):
-    """Remove all format from string, replace `\\P` (paragraphs) with newlines
     """
+    Returns string with removed format innformation as :func:`unformat_mtext` and
+    `\\P` (paragraphs) replaced with newlines
+
+    ::
+
+        >>> text = ur'{\\fGOST type A|b0|i0|c204|p34;TEST\\fGOST type A|b0|i0|c0|p34;123}\\Ptest321'
+        >>> mtext_to_string(text)
+        u'TEST123\\ntest321'
+
+    """
+
     return unformat_mtext(s).replace(u'\\P', u'\n')
 
 
@@ -34,7 +51,7 @@ def string_to_mtext(s):
 
 
 def text_width(text_item):
-    """Returns width of Autocad `Text` or `MultiText`
+    """Returns width of Autocad `Text` or `MultiText` object
     """
     bbox_min, bbox_max = text_item.GetBoundingbox()
     return bbox_max[0] - bbox_min[0]
@@ -42,7 +59,7 @@ def text_width(text_item):
 
 @contextmanager
 def timing(message=u'Elapsed'):
-    """ Context manager for timing execution time
+    """ Context manager for timing execution
 
     Usage::
 

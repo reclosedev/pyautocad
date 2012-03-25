@@ -24,9 +24,11 @@ class APoint(array.array):
         >>> APoint(range(3))
         APoint(0.00, 1.00, 2.00)
 
-    Supported math operations: `+` `-` `*` `/`, `+=` `-=` `*=` `/=`::
+    Supported math operations: `+`, `-`, `*`, `/`, `+=`, `-=`, `*=`, `/=`::
 
         >>> p = APoint(10, 10)
+        >>> p + p
+        APoint(20.00, 20.00, 0.00)
         >>> p + 10
         APoint(20.00, 20.00, 10.00)
         >>> p * 2
@@ -77,7 +79,7 @@ class APoint(array.array):
     def distance_to(self, other):
         """ Returns distance to `other` point
 
-        :param other: :class:`APoint` instance or any sequence of 3 points
+        :param other: :class:`APoint` instance or any sequence of 3 coordinates
         """
         return distance(self, other)
 
@@ -148,8 +150,13 @@ def distance(p1, p2):
                      (p1[1] - p2[1]) ** 2 +
                      (p1[2] - p2[2]) ** 2)
 
+
+# next functions can accept parameters as aDouble(1, 2, 3)
+# or as list or tuple aDouble([1, 2, 3])
 def aDouble(*seq):
     """ Returns :class:`array.array` of doubles ('d' code) for passing to AutoCAD
+
+    For 3D points use :class:`APoint` instead.
     """
     return _sequence_to_comtypes('d', *seq)
 

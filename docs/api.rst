@@ -1,16 +1,21 @@
-
-
 API
 ===
 
-Autocad object
----------------
+This part of the documentation covers all the interfaces of `pyautocad`
 
-.. data:: ACAD
-    Constants from AutoCAD type library
+Main Autocad interface
+----------------------
 
 .. automodule:: pyautocad.api
    :members:
+
+.. data:: ACAD
+
+   Constants from AutoCAD type library, for example::
+
+       text.Alignment = ACAD.acAlignmentRight
+
+-----------------------------------------------------------------------------
 
 Types
 ------
@@ -18,15 +23,18 @@ Types
 .. automodule:: pyautocad.types
    :members:
 
+-----------------------------------------------------------------------------
 
-Utils
------
+Utility functions
+-----------------
 
 .. automodule:: pyautocad.utils
    :members:
 
-Table
------
+-----------------------------------------------------------------------------
+
+Working with Tables
+-------------------
 
 .. automodule:: pyautocad.contrib.tables
    :members:

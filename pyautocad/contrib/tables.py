@@ -43,7 +43,7 @@ class Table(object):
         """ Add `row` to table
 
         :param row: row to add
-        :type row: sequence as list or tuple
+        :type row: list or tuple
         """
         self.dataset.append(row)
 
@@ -155,7 +155,7 @@ class _TableImporter(object):
             columns = []
             for col in xrange(sheet.ncols):
                 val = sheet.cell(row, col).value
-                columns.append(unicode(val))
+                columns.append(val)
             yield columns
 
     def read_json(self, stream):
