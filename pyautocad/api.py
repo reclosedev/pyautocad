@@ -5,8 +5,13 @@ __all__ = ['Autocad', 'ACAD']
 
 import logging
 import comtypes
-#: constants from AutoCAD type library
-import comtypes.gen.AutoCAD as ACAD
+try:
+    import comtypes.gen.AutoCAD as ACAD
+except ImportError:
+    # It's mainly used to build documentation on RTD
+    ACAD = None
+    print("Autocad type library unavailable")
+
 import pyautocad.types
 
 
