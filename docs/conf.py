@@ -38,7 +38,7 @@ class Mock(object):
         else:
             return Mock()
 
-sys.modules['comtypes'] = Mock()
+sys.modules['comtypes', 'tablib', 'xlrd'] = Mock()
 
 
 # -- General configuration -----------------------------------------------------
