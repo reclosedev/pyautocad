@@ -68,7 +68,7 @@ def timing(message=u'Elapsed'):
 
     Will print::
 
-        some operation: 1.000 s
+        some operation: 1.000 s  # where 1.000 is actual execution time
 
     """
     begin = time.time()

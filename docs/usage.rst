@@ -40,12 +40,17 @@ Wea also can iterate objects of concrete type:
 .. literalinclude:: example.py
    :lines: 20-21
 
+.. note::
+
+    Object name can be partial and case insensitive, e.g.
+    ``acad.iter_objects('tex')`` will return ``AcDbText`` and ``AcDbMText`` objects
+
 Or multiple types:
 
 .. literalinclude:: example.py
    :lines: 23-24
 
-Also we can find first object with some conditions (common task).
+Also we can find first object with some conditions.
 For example, let's find first text item which contains ``3``:
 
 .. literalinclude:: example.py
@@ -91,19 +96,20 @@ It allows you to read and write tabular data in popular formats:
 - json
 
 Let's try to solve some basic task. We need to save text and position
-from all text ojbects to Excel file, and then load it back.
+from all text objects to Excel file, and then load it back.
 
 First we need to add some objects to AutoCAD:
 
 .. literalinclude:: example_tables.py
    :lines: 3-10
 
-Now we can to iterate this objects and save them to Excel table:
+Now we can iterate this objects and save them to Excel table:
 
 .. literalinclude:: example_tables.py
    :lines: 12-16
 
-To retrieve data from file:
+After saving this data to 'data.xls' and probably changing it with some table
+processor software (e.g. Microsoft Office Excel) we can retrieve our data from file:
 
 .. literalinclude:: example_tables.py
    :lines: 18
@@ -115,6 +121,11 @@ To retrieve data from file:
      [u'Hi 2!', 0.0, 20.0, 0.0],
      [u'Hi 3!', 0.0, 30.0, 0.0],
      [u'Hi 4!', 0.0, 40.0, 0.0]]
+
+.. seealso::
+
+    Example of working with AutoCAD table objects
+    at `examples/dev_get_table_info.py <https://bitbucket.org/reclosedev/pyautocad/src/tip/examples/dev_get_table_info.py>`_
 
 Utility functions
 -----------------

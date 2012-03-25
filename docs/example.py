@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from pyautocad import Autocad, APoint
 
-acad = Autocad()
+acad = Autocad(create_if_not_exists=True)
 acad.prompt("Hello, Autocad from Python\n")
 print acad.doc.Name
 

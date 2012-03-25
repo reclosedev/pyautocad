@@ -6,7 +6,7 @@ Installation
 
 If you have pip_ or easy_install_, you can just::
 
-    pip install upgrade pyautocad
+    pip install --upgrade pyautocad
 
 or::
 
@@ -47,11 +47,12 @@ Reference can also be found in ``C:\Program Files\Common Files\Autodesk Shared\a
 What's next?
 ------------
 
-Read :doc:`usage`, or look for real applications in examples_ folder of source distribution.
+Read the :doc:`usage` section, or look for real applications in examples_ folder of source distribution.
 
 .. note::
 
-    Applications in examples_ are Russian specific, but anyway I hope you'll find something interesting in that code.
+    Applications in examples_ are Russian engineering specific, but anyway
+    I hope you'll find something interesting in that code.
 
 For more info on features see :doc:`api` documentation and sources_.
 
