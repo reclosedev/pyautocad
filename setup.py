@@ -8,7 +8,7 @@ with open('README.txt') as f:
 setup(
     name = "pyautocad",
     packages = ["pyautocad", "pyautocad.contrib"],
-    version = "0.1.0",
+    version = "0.1.1",
     description = "AutoCAD Automation for Python",
     author = "Roman Haritonov",
     author_email = "reclosedev@gmail.com",
