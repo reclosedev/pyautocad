@@ -133,3 +133,14 @@ Utility functions
 There is also some utility functions for work with AutoCAD text objects and more.
 See :mod:`pyautocad.utils` documentation.
 
+Improve speed
+-------------
+
+TODO:
+
+ActiveX technology is quite slow. When you are accessing object attributes like
+position, text, etc every time call is passed to AutoCAD. It can slow down execution
+time of your programs. For example if you have program, which combines single line
+text based on it's relative positions, you probably need to get each text position
+several times. To speed this up, you can use caching :mod:`pyautocad.cache`
+

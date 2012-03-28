@@ -38,3 +38,11 @@ Working with Tables
 
 .. automodule:: pyautocad.contrib.tables
    :members:
+
+-----------------------------------------------------------------------------
+
+Caching
+-------
+
+.. automodule:: pyautocad.cache
+   :members:
