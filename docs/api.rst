@@ -3,8 +3,8 @@ API
 
 This part of the documentation covers all the interfaces of `pyautocad`
 
-Main Autocad interface
-----------------------
+``api`` - Main Autocad interface
+--------------------------------------------
 
 .. automodule:: pyautocad.api
    :members:
@@ -17,32 +17,32 @@ Main Autocad interface
 
 -----------------------------------------------------------------------------
 
-Types
-------
+``types`` - 3D Point and other Autocad data types
+-------------------------------------------------
 
 .. automodule:: pyautocad.types
    :members:
 
 -----------------------------------------------------------------------------
 
-Utility functions
------------------
+``utils`` - Utility functions
+-------------------------------------------------------------
 
 .. automodule:: pyautocad.utils
    :members:
 
 -----------------------------------------------------------------------------
 
-Working with Tables
--------------------
+``contrib.tables`` - Import and export tabular data from popular formats
+------------------------------------------------------------------------
 
 .. automodule:: pyautocad.contrib.tables
    :members:
 
 -----------------------------------------------------------------------------
 
-Caching
--------
+``cache`` - Cache all object's attributes
+------------------------------------------
 
 .. automodule:: pyautocad.cache
    :members:
