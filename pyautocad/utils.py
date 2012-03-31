@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#date: 16.01.12
+"""
+    pyautocad.utils
+    ~~~~~~~~~~~~~~~
+
+    Utility functions for work with texts, tables, etc.
+
+    :copyright: (c) 2012 by Roman Haritonov.
+    :license: BSD, see LICENSE.txt for more details.
+"""
+
 import sys
 import re
 import time
@@ -58,8 +67,31 @@ def text_width(text_item):
 
 
 @contextmanager
+def suppressed_regeneration_of(table):
+    """ .. versionadded:: 0.1.2
+
+    Context manager. Suppresses table regeneration to dramatically speedup table operations
+
+    :param table: table object
+
+    ::
+
+        with suppressed_regeneration_of(table):
+            populate(table)  # or change its properties
+
+    """
+    # TODO: find the way to suppress regeneration of other objects
+    table.RegenerateTableSuppressed = True
+    try:
+        yield
+    finally:
+        table.RegenerateTableSuppressed = False
+
+@contextmanager
 def timing(message=u'Elapsed'):
     """ Context manager for timing execution
+
+    :param message: message to print
 
     Usage::
 
@@ -77,6 +109,8 @@ def timing(message=u'Elapsed'):
     finally:
         elapsed = (time.time() - begin)
         print u'%s: %.3f s' % (message, elapsed)
+
+
 
 
 def dynamic_print(text):

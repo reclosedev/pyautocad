@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#date: 16.01.12
+"""
+    pyautocad.types
+    ~~~~~~~~~~~~~~~
+
+    3D Points and and other AutoCAD data types.
+
+    :copyright: (c) 2012 by Roman Haritonov.
+    :license: BSD, see LICENSE.txt for more details.
+"""
 import array
 import operator
 import math

@@ -1,4 +1,4 @@
-include LICENSE.txt AUTHORS README.txt
+include LICENSE.txt AUTHORS README.txt HISTORY.txt
 include *.py
 recursive-include tests *.py
 recursive-include examples *.py

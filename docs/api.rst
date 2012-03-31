@@ -17,7 +17,7 @@ This part of the documentation covers all the interfaces of `pyautocad`
 
 -----------------------------------------------------------------------------
 
-``types`` - 3D Point and other Autocad data types
+``types`` - 3D Point and other AutoCAD data types
 -------------------------------------------------
 
 .. automodule:: pyautocad.types
@@ -30,6 +30,14 @@ This part of the documentation covers all the interfaces of `pyautocad`
 
 .. automodule:: pyautocad.utils
    :members:
+   :exclude-members: timing, suppressed_regeneration_of
+
+   .. autofunction:: timing(message)
+   .. autofunction:: suppressed_regeneration_of(table)
+
+
+
+
 
 -----------------------------------------------------------------------------
 
@@ -37,12 +45,14 @@ This part of the documentation covers all the interfaces of `pyautocad`
 ------------------------------------------------------------------------
 
 .. automodule:: pyautocad.contrib.tables
-   :members:
+    :synopsis: test
+    :members:
 
 -----------------------------------------------------------------------------
 
 ``cache`` - Cache all object's attributes
 ------------------------------------------
+.. versionadded:: 0.1.2
 
 .. automodule:: pyautocad.cache
    :members:

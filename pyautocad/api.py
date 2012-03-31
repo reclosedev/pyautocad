@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#date: 16.01.12
+"""
+    pyautocad.api
+    ~~~~~~~~~~~~~~~
+
+    Main AutoCAD automation object.
+
+    :copyright: (c) 2012 by Roman Haritonov.
+    :license: BSD, see LICENSE.txt for more details.
+"""
+
 __all__ = ['Autocad', 'ACAD']
 
 import logging

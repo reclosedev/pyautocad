@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+.. versionadded:: 0.1.2
+
+    pyautocad.cache
+    ~~~~~~~~~~~~~~~
+
+    Proxy to cache all object attributes.
+
+    :copyright: (c) 2012 by Roman Haritonov.
+    :license: BSD, see LICENSE.txt for more details.
+"""
 
 
 class Cached(object):
@@ -38,6 +49,21 @@ class Cached(object):
         object.__setattr__(self, '_instance', instance)
         object.__setattr__(self, '_is_enabled', True)
         object.__setattr__(self, '_storage', {})
+
+    def get_original(self):
+        """ Returns original instance
+        """
+        return self._instance
+
+    def switch_caching(self, is_enabled):
+        """ Switch caching on or off
+
+        :param is_enabled: caching status `True` or `False`
+        :type is_enabled: bool
+        """
+        self._is_enabled = is_enabled
+        if not is_enabled:
+            self._storage = {}
     
     def __setattr__(self, key, value):
         if key in self.__dict__:
@@ -63,20 +89,7 @@ class Cached(object):
             del self._storage[key]
         object.__delattr__(self._instance, key)
 
-    def get_original(self):
-        """ Returns original instance
-        """
-        return self._instance
-    
-    def switch_caching(self, is_enabled):
-        """ Switch caching on or off
-        
-        :param is_enabled: caching status `True` or `False`
-        :type is_enabled: bool
-        """
-        self._is_enabled = is_enabled
-        if not is_enabled:
-            self._storage = {}
+
 
 
 if __name__ == "__main__":

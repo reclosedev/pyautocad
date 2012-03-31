@@ -127,20 +127,27 @@ processor software (e.g. Microsoft Office Excel) we can retrieve our data from f
     Example of working with AutoCAD table objects
     at `examples/dev_get_table_info.py <https://bitbucket.org/reclosedev/pyautocad/src/tip/examples/dev_get_table_info.py>`_
 
+Improve speed
+-------------
+
+-   ActiveX technology is quite slow. When you are accessing object attributes like
+    position, text, etc every time call is passed to AutoCAD. It can slow down execution
+    time of your programs. For example if you have program, which combines single line
+    text based on it's relative positions, you probably need to get each text position
+    several times. To speed this up, you can use :mod:`cache module <pyautocad.cache>`
+
+-   To improve speed of AutoCAD table populating, you can use ``Table.RegenerateTableSuppressed = True``
+    or handy context manager :func:`pyautocad.utils.suppressed_regeneration_of`::
+
+        table = acad.model.AddTable(pos, rows, columns, row_height, col_width)
+        with suppressed_regeneration_of(table):
+            table.SetAlignment(ACAD.acDataRow, ACAD.acMiddleCenter)
+            for row in range(rows):
+                for col in range(columns):
+                    table.SetText(row, col, '%s %s' % (row, col))
+
 Utility functions
 -----------------
 
 There is also some utility functions for work with AutoCAD text objects and more.
 See :mod:`pyautocad.utils` documentation.
-
-Improve speed
--------------
-
-TODO:
-
-ActiveX technology is quite slow. When you are accessing object attributes like
-position, text, etc every time call is passed to AutoCAD. It can slow down execution
-time of your programs. For example if you have program, which combines single line
-text based on it's relative positions, you probably need to get each text position
-several times. To speed this up, you can use :mod:`cache module <pyautocad.cache>`
-

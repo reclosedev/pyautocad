@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#date: 15.02.12
+"""
+    pyautocad.contrib.tables
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Import and export tabular data from popular formats.
+
+    :copyright: (c) 2012 by Roman Haritonov.
+    :license: BSD, see LICENSE.txt for more details.
+"""
+
 import csv
 import json
 import os
