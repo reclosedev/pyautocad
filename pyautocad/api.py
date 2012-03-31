@@ -15,14 +15,15 @@ __all__ = ['Autocad', 'ACAD']
 import logging
 import comtypes
 try:
+    import comtypes.client
+    # generate modules for work with ACAD constants
+    comtypes.client.GetModule(['{851A4561-F4EC-4631-9B0C-E7DC407512C9}', 1, 0])
     import comtypes.gen.AutoCAD as ACAD
-except ImportError:
-    # It's mainly used to build documentation on RTD
+except Exception:
+    # we are under readthedocs.org and need to mock this
     ACAD = None
-    print("Autocad type library unavailable")
 
 import pyautocad.types
-
 
 logger = logging.getLogger(__name__)
 

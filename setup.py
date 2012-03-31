@@ -14,7 +14,7 @@ setup(
     author_email = "reclosedev@gmail.com",
     url = "https://bitbucket.org/reclosedev/pyautocad",
     install_requires=[
-        'comtypes>=0.6.2',
+        'comtypes',
     ],
     keywords = ["autocad", "automation", "activex", "comtypes"],
     license = "BSD License",

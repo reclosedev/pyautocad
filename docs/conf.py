@@ -17,7 +17,6 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
-from pyautocad import __version__
 
 class Mock(object):
     def __init__(self, *args, **kwargs):
@@ -39,6 +38,7 @@ MOCK_MODULES = ['comtypes', 'tablib', 'xlrd']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
 
+from pyautocad import __version__
 
 # -- General configuration -----------------------------------------------------
 
