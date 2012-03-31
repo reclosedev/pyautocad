@@ -1,0 +1,21 @@
+History
+-------
+
+0.1.1 (2012-03-31)
++++++++++++++++++++
+
+* Documentation improvements
+* ``cache.Cached`` proxy for caching expensive object attributes
+* ``utils.suppressed_regeneration_of(table)`` context manager
+* Fix: `cx_setup.py` script exclude list
+
+
+0.1.1 (2012-03-25)
++++++++++++++++++++
+
+* Documentation and usage examples
+
+0.1.0 (2012-03-23)
++++++++++++++++++++
+
+* initial PyPI release
