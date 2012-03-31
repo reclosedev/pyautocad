@@ -133,7 +133,7 @@ Improve speed
 -   ActiveX technology is quite slow. When you are accessing object attributes like
     position, text, etc, every time call is passed to AutoCAD. It can slowdown execution
     time. For example if you have program, which combines single line
-    text based on it's relative positions, you probably need to get each text position
+    text based on its relative positions, you probably need to get each text position
     several times. To speed this up, you can cache objects attributes using the :class:`pyautocad.cache.Cached` proxy (see example in class documentation)
 
 -   To improve speed of AutoCAD table manipulations, you can use ``Table.RegenerateTableSuppressed = True``
