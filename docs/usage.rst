@@ -19,7 +19,7 @@ Let's create AutoCAD application or connect to already running application:
    :lines: 5-7
 
 To work with AutoCAD documents and objects we can use ActiveX interface,
-:class:`Autocad` contains some methods to simplify common Automation tasks, such as
+:class:`Autocad` (from pyautocad) contains some methods to simplify common Automation tasks, such as
 object iteration and searching, getting objects from user's selection, printing messages.
 
 There are shortcuts for current ``ActiveDocument`` - :attr:`Autocad.doc`
@@ -35,7 +35,7 @@ Now our document contains some ``Texts``, ``Lines`` and ``Circles``, let's itera
 .. literalinclude:: example.py
    :lines: 17-18
 
-Wea also can iterate objects of concrete type:
+Wea can also iterate objects of concrete type:
 
 .. literalinclude:: example.py
    :lines: 20-21
@@ -56,7 +56,7 @@ For example, let's find first text item which contains ``3``:
 .. literalinclude:: example.py
    :lines: 26-30
 
-To modify objects in document, we need to find interesting objects, and change its properties.
+To modify objects in document, we need to find interesting objects and change its properties.
 Some properties are described with constants, e.g. text alignment. These constants can be accessed through
 :data:`ACAD`. Let's change all text objects text alignment:
 
@@ -65,11 +65,11 @@ Some properties are described with constants, e.g. text alignment. These constan
 
 .. currentmodule:: pyautocad.types
 
-In previous code we have converted text.InsertionPoint to :class:`APoint` because
+In previous code we have converted ``text.InsertionPoint`` to :class:`APoint` because
 we can't just use default ``tuple`` when setting another properties such as ``text.TextAlignmentPoint``.
 
-If wee need to change position of some object, we should use :class:`APoint`, for example let's
-change lines end position:
+If wee need to change position of some object, we should use :class:`APoint`, 
+for example let's change lines end position:
 
 .. literalinclude:: example.py
    :lines: 39-41
