@@ -3,11 +3,6 @@ pyautoacad - AutoCAD Automation for Python
 
 This library aimed to simplify writing ActiveX_ Automation_ scripts for AutoCAD_ with Python
 
-Documentation:
---------------
-
-Documentation can be found at `readthedocs.org <http://readthedocs.org/docs/pyautocad/>`_
-
 Requires:
 ----------
 
@@ -55,6 +50,13 @@ Simple usage example:
         print(obj.ObjectName)
 
 See more examples_ in source distribution.
+
+Links
+-----
+
+- **Documentation** at `readthedocs.org <http://readthedocs.org/docs/pyautocad/>`_
+
+- **Source code and issue tracking** at `GitHub <https://github.com/reclosedev/pyautocad>`_.
 
 .. _ActiveX: http://wikipedia.org/wiki/ActiveX
 .. _Automation: http://en.wikipedia.org/wiki/OLE_Automation
