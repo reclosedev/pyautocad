@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 from distutils.core import setup
 
-with open('README.txt') as f:
-    long_description = f.read()
 
 setup(
     name = "pyautocad",
@@ -28,6 +26,6 @@ setup(
         "Operating System :: Microsoft :: Windows",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering",
-        ],
-    long_description = long_description
+    ],
+    long_description = open('README.rst').read()
 )
