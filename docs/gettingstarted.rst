@@ -56,6 +56,6 @@ Read the :doc:`usage` section, or look for real applications in examples_ folder
 
 For more info on features see :doc:`api` documentation and sources_.
 
-.. _examples: https://bitbucket.org/reclosedev/pyautocad/src/tip/examples
-.. _sources: https://bitbucket.org/reclosedev/pyautocad/src/
+.. _examples: https://github.com/reclosedev/pyautocad/tree/master/examples
+.. _sources: https://github.com/reclosedev/pyautocad
 

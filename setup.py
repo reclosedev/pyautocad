@@ -10,7 +10,7 @@ setup(
     description = "AutoCAD Automation for Python",
     author = "Roman Haritonov",
     author_email = "reclosedev@gmail.com",
-    url = "https://bitbucket.org/reclosedev/pyautocad",
+    url = "https://github.com/reclosedev/pyautocad",
     install_requires=[
         'comtypes',
     ],

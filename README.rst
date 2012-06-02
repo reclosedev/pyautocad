@@ -62,5 +62,5 @@ See more examples_ in source distribution.
 .. _comtypes: http://pypi.python.org/pypi/comtypes
 .. _xlrd: http://pypi.python.org/pypi/xlrd
 .. _tablib: http://pypi.python.org/pypi/tablib
-.. _examples: https://bitbucket.org/reclosedev/pyautocad/src/tip/examples
+.. _examples: https://github.com/reclosedev/pyautocad/tree/master/examples
 .. _documentation: http://readthedocs.org/docs/pyautocad/

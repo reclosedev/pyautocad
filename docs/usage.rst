@@ -125,7 +125,7 @@ processor software (e.g. Microsoft Office Excel) we can retrieve our data from f
 .. seealso::
 
     Example of working with AutoCAD table objects
-    at `examples/dev_get_table_info.py <https://bitbucket.org/reclosedev/pyautocad/src/tip/examples/dev_get_table_info.py>`_
+    at `examples/dev_get_table_info.py <https://github.com/reclosedev/pyautocad/blob/master/examples/dev_get_table_info.py>`_
 
 Improve speed
 -------------
