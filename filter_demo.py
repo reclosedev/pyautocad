@@ -71,8 +71,11 @@ def main():
     print timeit.timeit(v2, number=1)
 
 def main():
+    print acad.model.filter().count()
     qs = acad.model.filter(ObjectName='AcDbMText').best_interface()
-    print qs.count()
+#    print qs.count()
+#    print qs.first()
+
     for i, obj in enumerate(qs):
         print i, obj.ObjectName, obj.InsertionPoint, obj.TextString
 

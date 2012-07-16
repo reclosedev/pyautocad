@@ -9,7 +9,7 @@ from pyautocad.filter.query import UnknownOperation
 pyautocad.filter.install()
 
 
-class ApiTestCase(unittest.TestCase):
+class FilterTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -35,10 +35,13 @@ class ApiTestCase(unittest.TestCase):
         cls.doc.Close(False)
 
     def test_count_objects(self):
-        model = self.acad.model
-        self.assertEqual(model.filter(ObjectName__contains='Line').count(), self.n_lines)
-        self.assertEqual(model.filter(ObjectName__contains='MText').count(), self.n_texts)
-        self.assertEqual(model.filter(ObjectName__in_part=['Line', 'MText']).count(), self.n_lines + self.n_texts)
+        m = self.acad.model
+        self.assertEqual(m.filter(ObjectName__contains='Line').count(),
+                         self.n_lines)
+        self.assertEqual(m.filter(ObjectName__contains='MText').count(),
+                         self.n_texts)
+        self.assertEqual(m.filter(ObjectName__in_part=['Line', 'MText']).count(),
+                         self.n_lines + self.n_texts)
 
     def test_operations(self):
         model = self.acad.model
@@ -79,6 +82,7 @@ class ApiTestCase(unittest.TestCase):
         n = qs.count()
         for _ in qs:
             n -= 1
+
         self.assertEqual(n, 0)
         self.assertEqual(len(qs), qs.count())
         qs.first()
@@ -87,6 +91,30 @@ class ApiTestCase(unittest.TestCase):
         qs = model.filter(ObjectName__contains='Line').best_interface()
         for obj in qs:
             self.assert_(hasattr(obj, 'StartPoint'))
+
+        qs = model.filter()
+        self.assertEqual(len(qs[5:10]), 5)
+        with self.assertRaises(AssertionError):
+            print qs[10].ObjectName
+
+        qs = model.filter()
+        n = self.n_lines + self.n_texts
+        self.assertEqual(len(qs[5:]), n - 5)
+        qs = model.filter().best_interface()
+        self.assertEqual(qs[1].StartPoint, (0, 10, 0))
+        self.assertEqual(qs[2].StartPoint, (0, 20, 0))
+
+        qs = model.filter()
+        self.assertEqual(len(qs[:100]), n)
+
+        qs = model.filter()
+        self.assertEqual(len(qs[100:]), 0)
+        self.assertEqual(len(qs[n - 5:]), 5)
+        qs = model.filter()
+        self.assertEqual(len(qs[100:n]), 0)
+        qs = model.filter()
+        self.assertEqual(len(qs[n - 5:n]), 5)
+
 
 if __name__ == '__main__':
     unittest.main()

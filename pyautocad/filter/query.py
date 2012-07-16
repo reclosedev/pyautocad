@@ -101,9 +101,9 @@ class Query(object):
 
     def _get_extractor(self, name):
         name = ''.join(name[:1].upper() + name[1:])
+
         def extractor(obj):
             return getattr(obj, name, self._sentinel)
-
         extractor.__name__ = 'Extract<%r>' % name
         return extractor, name
 
@@ -139,7 +139,8 @@ class _ChainedOp(object):
 
 
 class QuerySet(object):
-    def __init__(self, query_or_dict, block=None, block_iterator=None, best_interface=False):
+    def __init__(self, query_or_dict,
+                 block=None, block_iterator=None, need_best_interface=False):
         if block is not None:
             self._block_iterator = self._iterate_block(block)
         elif block_iterator is not None:
@@ -152,7 +153,7 @@ class QuerySet(object):
         else:
             self._query = Query(query_or_dict)
 
-        self._best_interface = best_interface
+        self._need_best_interface = need_best_interface
 
         self._iter_started = False
         self._cache = None
@@ -165,7 +166,7 @@ class QuerySet(object):
         for obj in self._block_iterator:
             matches, got_best_interface, obj = query.execute(obj)
             if matches:
-                if self._best_interface:
+                if self._need_best_interface:
                     if not got_best_interface:
                         obj = comtypes.client.GetBestInterface(obj)
                 yield obj
@@ -183,6 +184,38 @@ class QuerySet(object):
 
     def __len__(self):
         return self.count()
+
+    def __getitem__(self, k):
+        # checks are taken from Django
+        if not isinstance(k, (slice, int, long)):
+            raise TypeError
+        assert ((not isinstance(k, slice) and (k >= 0))
+                or (isinstance(k, slice) and (k.start is None or k.start >= 0)
+                    and (k.stop is None or k.stop >= 0))),\
+        "Negative indexing is not supported."
+
+        if self._cache:
+            return self._cache[k]
+
+        if isinstance(k, slice):
+            if k.stop is not None and k.step is None:
+                stop = k.stop
+                gen = self.__iter__()
+                result = []
+                if k.start:
+                    start = k.start
+                    for _ in gen:
+                        start -= 1
+                        if not start:
+                            break
+                for i, obj in enumerate(gen, k.start or 0):
+                    if stop is not None and i >= stop:
+                        break
+                    result.append(obj)
+                return result
+            else:
+                return [self[i] for i in range(*k.indices(len(self)))]
+        return self.all()[k]
 
     def all(self):
         if not self._cache:
@@ -208,4 +241,4 @@ class QuerySet(object):
         pass
 
     def best_interface(self):
-        return QuerySet({}, block_iterator=iter(self), best_interface=True)
+        return QuerySet({}, block_iterator=iter(self), need_best_interface=True)

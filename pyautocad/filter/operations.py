@@ -30,7 +30,7 @@ def _custom_operations():
         return a.endswith(b)
 
     def op_range(a, b):
-        return a >= b[0] and a <= b[1]
+        return b[0] <= a <= b[1]
 
     def op_x(a, b):
         return a[0]
