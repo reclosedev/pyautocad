@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from pprint import pprint
+import timeit
 import pyautocad
 from pyautocad import Autocad, APoint
 import time
@@ -52,8 +53,29 @@ def main():
         #InsertionPoint__x=100, InsertionPoint__y__lt=100.1,
         #InsertionPoint__y__range=(50, 110)
     )
+    print gen.all()
     for i, obj in enumerate(gen):
         print i, obj.ObjectName, obj.InsertionPoint, obj.TextString
+
+def main():
+    def v1():
+        qs = acad.model.filter(ObjectName='AcDbText', TextString__startswith=u'5')
+        for i, obj in enumerate(qs):
+            print i, obj.ObjectName, obj.InsertionPoint, obj.TextString
+    def v2():
+        qs = acad.model.filter(ObjectName='AcDbText')
+        qs = qs.filter(TextString__startswith=u'5')
+        for i, obj in enumerate(qs):
+            print i, obj.ObjectName, obj.InsertionPoint, obj.TextString
+    print timeit.timeit(v1, number=1)
+    print timeit.timeit(v2, number=1)
+
+def main():
+    qs = acad.model.filter(ObjectName='AcDbMText').best_interface()
+    print qs.count()
+    for i, obj in enumerate(qs):
+        print i, obj.ObjectName, obj.InsertionPoint, obj.TextString
+
 
 if __name__ == '__main__':
     t = time.time()

@@ -49,9 +49,10 @@ class Query(object):
         return any(m.name not in self._acad_entity_fields
                    for m in self._matchers)
 
-    def execute(self, obj, got_best_interface=False):
+    def execute(self, obj):
         # TODO maybe all()?
         # TODO delegate to Matcher?
+        got_best_interface = False
         for matcher in self._matchers:
             # if GetBestInterface is very expensive, so we check it in last moment
             # if all other conditions are meet
@@ -61,11 +62,11 @@ class Query(object):
             obj_value = matcher.extractor(obj)
             try:
                 if not matcher.operation(obj_value, matcher.value):
-                    return False, obj
+                    return False, got_best_interface, obj
             except Exception as e:
                 print e
-                return False, obj
-        return True, obj
+                return False, got_best_interface, obj
+        return True, got_best_interface, obj
 
     def _parse_field(self, field, value=None):
         # TODO value can be callable, in this case we should extract attributes and call func against them
@@ -107,8 +108,8 @@ class Query(object):
         extractor.__name__ = 'Extract<%r>' % name
         return extractor, name
 
-    def __str__(self):
-        return '\n'.join(self._matchers)
+    def __repr__(self):
+        return 'Query<%s>' % '\n'.join(self._matchers)
 
 
 def _check_sentinel(func):
@@ -136,3 +137,83 @@ class _ChainedOp(object):
     @property
     def __name__(self):
         return self.__repr__()
+
+class QuerySet(object):
+    def __init__(self, query_or_dict, block=None, block_iterator=None, best_interface=False):
+        if block is not None:
+            self._block_iterator = self._iterate_block(block)
+        elif block_iterator is not None:
+            self._block_iterator = block_iterator
+
+        assert self._block_iterator, "Block or block_iterator should be provided"
+
+        if isinstance(query_or_dict, Query):
+            self._query = query_or_dict
+        else:
+            self._query = Query(query_or_dict)
+
+        self._best_interface = best_interface
+
+        self._iter_started = False
+        self._cache = []
+        self._cache_is_full = False
+
+    def _iterator(self):
+        assert not self._iter_started, "Can't iterate second time"
+        self._iter_started = True
+        query = self._query
+
+        for obj in self._block_iterator:
+            matches, got_best_interface, obj = query.execute(obj)
+            if matches:
+                if self._best_interface:
+                    if not got_best_interface:
+                        obj = comtypes.client.GetBestInterface(obj)
+                self._cache.append(obj)
+                yield obj
+        self._cache_is_full = True
+
+    def _iterate_block(self, block):
+        count = block.Count
+        for i in xrange(count):
+            obj = block.Item(i)
+            yield obj
+
+    def __iter__(self):
+        if self._cache_is_full:
+            return iter(self._cache)
+        return self._iterator()
+
+    def __len__(self):
+        return self.count()
+
+    def all(self):
+        if not self._cache_is_full:
+            self._prefetch()
+        return self._cache
+
+    def count(self):
+        return len(self.all())
+
+    def first(self):
+        if self._cache:
+            return self._cache[0]
+        obj = next(self, None)
+        return obj
+
+    def filter(self, **kwargs):
+        return QuerySet(kwargs, block_iterator=iter(self))
+
+    def order_by(self, field): # TODO
+        pass
+
+    def exclude(self, **kwargs): # TODO and maybe combine with filter
+        pass
+
+    def best_interface(self):
+        return QuerySet({}, block_iterator=iter(self), best_interface=True)
+
+    def _prefetch(self):
+        if not self._cache_is_full:
+            for obj in self:
+                pass

@@ -3,7 +3,7 @@
 from comtypes.partial import partial
 
 import pyautocad
-from .query import Query
+from .query import QuerySet
 
 
 def install():
@@ -12,12 +12,6 @@ def install():
     print 'registering PartialBlock'
     class PartialBlock(partial, pyautocad.ACAD.IAcadBlock):
         def filter(self, **kwargs):
-            q = Query(kwargs)
-            count = self.Count
-            for i in xrange(count):
-                obj = self.Item(i)
-                matches, obj = q.execute(obj)
-                if matches:
-                    yield obj
+            return QuerySet(kwargs, self)
 
     return PartialBlock
