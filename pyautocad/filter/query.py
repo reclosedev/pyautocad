@@ -6,7 +6,12 @@ from collections import namedtuple
 from pprint import pprint
 import comtypes.client
 
-from .operations import operations
+from .operations import operations, extractors_as_operation
+
+
+class UnknownOperation(Exception):
+    """ Raised when operation is unknown
+    """
 
 BaseMatcher = namedtuple('BaseMatcher', 'extractor, name, operation, value')
 
@@ -22,11 +27,10 @@ class Query(object):
     _sentinel = object()
     _acad_entity_fields = frozenset([
         'Application', 'Database', 'Document', 'EntityName', 'EntityType',
-        'Handle', 'HasExtensionDictionary', 'Layer', 'Linetype', 'LinetypeScale',
-        'Lineweight', 'Material', 'ObjectID', 'ObjectName', 'OwnerID', 'PlotStyleName',
-        'TrueColor', 'Visible', 'color', 'value'
+        'Handle', 'HasExtensionDictionary', 'Layer', 'Linetype',
+        'LinetypeScale', 'Lineweight', 'Material', 'ObjectID', 'ObjectName',
+        'OwnerID', 'PlotStyleName', 'TrueColor', 'Visible', 'color', 'value'
     ])
-    _name_as_op = frozenset(['x', 'y', 'z'])  # TODO str
 
     def __init__(self, query_dict):
         self._matchers = self._parse_query(query_dict)
@@ -45,17 +49,12 @@ class Query(object):
 
         return sorted(matchers, key=smart_key)
 
-    def need_best_interface(self):
-        return any(m.name not in self._acad_entity_fields
-                   for m in self._matchers)
-
     def execute(self, obj):
-        # TODO maybe all()?
-        # TODO delegate to Matcher?
         got_best_interface = False
+
         for matcher in self._matchers:
-            # if GetBestInterface is very expensive, so we check it in last moment
-            # if all other conditions are meet
+            # because GetBestInterface is very expensive we call it in the
+            # last moment if all other conditions are meet
             if not got_best_interface and matcher.name not in self._acad_entity_fields:
                 obj = comtypes.client.GetBestInterface(obj)
                 got_best_interface = True
@@ -76,7 +75,7 @@ class Query(object):
             fields = field.split('__')
             name = fields[0]
             # if field is ending with property or digit like InsertionPoint__x, add eq op
-            if fields[-1] in self._name_as_op or fields[-1].isdigit():
+            if fields[-1] in extractors_as_operation or fields[-1].isdigit():
                 fields.append('eq')
             if len(fields) == 2:
                 operation = self._get_operation(fields[1])
@@ -97,7 +96,7 @@ class Query(object):
             return operation
         operation = operations.get(name)
         if not operation:
-            raise Exception('Unknown operation %r' % name)
+            raise UnknownOperation('%r' % name)
         return operation
 
     def _get_extractor(self, name):
@@ -138,6 +137,7 @@ class _ChainedOp(object):
     def __name__(self):
         return self.__repr__()
 
+
 class QuerySet(object):
     def __init__(self, query_or_dict, block=None, block_iterator=None, best_interface=False):
         if block is not None:
@@ -155,8 +155,7 @@ class QuerySet(object):
         self._best_interface = best_interface
 
         self._iter_started = False
-        self._cache = []
-        self._cache_is_full = False
+        self._cache = None
 
     def _iterator(self):
         assert not self._iter_started, "Can't iterate second time"
@@ -169,9 +168,7 @@ class QuerySet(object):
                 if self._best_interface:
                     if not got_best_interface:
                         obj = comtypes.client.GetBestInterface(obj)
-                self._cache.append(obj)
                 yield obj
-        self._cache_is_full = True
 
     def _iterate_block(self, block):
         count = block.Count
@@ -180,7 +177,7 @@ class QuerySet(object):
             yield obj
 
     def __iter__(self):
-        if self._cache_is_full:
+        if self._cache:
             return iter(self._cache)
         return self._iterator()
 
@@ -188,8 +185,9 @@ class QuerySet(object):
         return self.count()
 
     def all(self):
-        if not self._cache_is_full:
-            self._prefetch()
+        if not self._cache:
+            # we are using __iter__ here, because list(self) can call self.__len__
+            self._cache = list(self.__iter__())
         return self._cache
 
     def count(self):
@@ -198,8 +196,7 @@ class QuerySet(object):
     def first(self):
         if self._cache:
             return self._cache[0]
-        obj = next(self, None)
-        return obj
+        return next(self.__iter__(), None)
 
     def filter(self, **kwargs):
         return QuerySet(kwargs, block_iterator=iter(self))
@@ -212,8 +209,3 @@ class QuerySet(object):
 
     def best_interface(self):
         return QuerySet({}, block_iterator=iter(self), best_interface=True)
-
-    def _prefetch(self):
-        if not self._cache_is_full:
-            for obj in self:
-                pass

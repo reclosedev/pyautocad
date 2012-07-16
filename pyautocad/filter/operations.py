@@ -5,11 +5,14 @@ import re
 
 
 def _custom_operations():
-    # TODO icontains, re, etc.
+    # TODO icontains, re, distance
     # a - object.value
     # b - user value
     def op_in(a, b):
         return a in b
+
+    def op_in_part(a, b):
+        return any(s in a for s in b)
 
     def op_re(a, b):
         return re.search(b, a)
@@ -47,3 +50,5 @@ def _custom_operations():
 operations = _custom_operations()
 operations.update({name: getattr(operator, name)
                   for name in ('eq', 'ne', 'lt', 'le', 'gt', 'ge', 'contains')})
+
+extractors_as_operation = frozenset(['x', 'y', 'z', 'len'])
