@@ -7,11 +7,11 @@ from .query import QuerySet
 
 
 def install():
-    """ Add method ``filter`` to IAcadBlock and all its children
+    """ Add method ``filter`` to IAcadObject and all its children
     """
-    print 'registering PartialBlock'
-    class PartialBlock(partial, pyautocad.ACAD.IAcadBlock):
+    class AcadObjectAdditions(partial, pyautocad.ACAD.IAcadObject):
         def filter(self, **kwargs):
+            assert hasattr(self, 'Count'), "Object %r is not iterable" % self
             return QuerySet(kwargs, self)
 
-    return PartialBlock
+    return AcadObjectAdditions
