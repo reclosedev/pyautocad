@@ -3,6 +3,8 @@
 import operator
 import re
 
+from pyautocad.types import APoint
+
 
 def _custom_operations():
     # TODO icontains, re, distance
@@ -44,11 +46,35 @@ def _custom_operations():
     def op_len(a, b):
         return len(a)
 
-    return {name.lstrip('op_'): value for name, value in list(locals().items())}
+    def op_distance(a, b): # eq check
+        distance = APoint(a).distance_to(b[0])
+        return distance == b[1]
 
+    op_dist = op_distance
 
+    func_map = {name.lstrip('op_'): value
+                for name, value in list(locals().items())
+                if name.startswith('op_')}
+
+    def _create_dist_compare_func(name):
+        op = getattr(operator, name)
+        def dist_compare(a, b):
+            distance = APoint(a).distance_to(b[0])
+            print distance, op
+            return op(distance, b[1])
+        dist_compare.__name__ = 'distance_%s' % name
+        return dist_compare
+
+    for name in _standard_operator_names:
+        func = _create_dist_compare_func(name)
+        func_map['distance_%s' % name] = func_map['dist_%s' % name] = func
+
+    return func_map
+
+_standard_operator_names = ('eq', 'ne', 'lt', 'le', 'gt', 'ge', 'contains')
 operations = _custom_operations()
 operations.update({name: getattr(operator, name)
-                  for name in ('eq', 'ne', 'lt', 'le', 'gt', 'ge', 'contains')})
+                  for name in _standard_operator_names})
 
 extractors_as_operation = frozenset(['x', 'y', 'z', 'len'])
+

@@ -57,6 +57,9 @@ class FilterTestCase(unittest.TestCase):
     def test_operations(self):
         model = self.acad.model
         test_set = [
+            ({'InsertionPoint__dist': ((10, 10, 0), 30.0)}, 1),
+            ({'InsertionPoint__dist_lt': ((10, 10, 0), 30.0)}, 3),
+            ({'InsertionPoint__dist_gt': ((10, 10, 0), 50.0)}, 9),
             ({'InsertionPoint__x__lt': 15}, 1),
             ({'InsertionPoint__x__lt': 15}, 1),
             ({'InsertionPoint__z__gt': 0}, 0),
