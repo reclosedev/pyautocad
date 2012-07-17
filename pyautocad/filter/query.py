@@ -44,11 +44,12 @@ class Query(object):
         for field, value in query_dict.items():
             extractor, name, operation = self._parse_field(field)
             matchers.append(Matcher(extractor, name, operation, value))
-        pprint(matchers)
 
         def smart_key(matcher):
             """ First sort by general methods """
-            return matcher.name not in ('ObjectName', 'EntityName', 'EntityType'), matcher.name
+            return matcher.name not in ('ObjectName',
+                                        'EntityName',
+                                        'EntityType'), matcher.name
 
         return sorted(matchers, key=smart_key)
 
@@ -66,8 +67,8 @@ class Query(object):
                 if not matcher.operation(obj_value, matcher.value):
                     return False, got_best_interface, obj
             except Exception as e:
-                print e
                 return False, got_best_interface, obj
+
         return True, got_best_interface, obj
 
     def _parse_field(self, field, add_eq_operation=True):
@@ -157,7 +158,6 @@ class QuerySet(object):
             self._query = Query(query_or_dict)
 
         self._need_best_interface = need_best_interface
-
         self._iter_started = False
         self._cache = None
 
@@ -264,7 +264,6 @@ class QuerySet(object):
 
         if '__' in field:
             extractor, name, operation = self._query._parse_field(field, False)
-            print extractor, name, operation
             if not strict:
                 def sort_key(obj):
                     return operation(extractor(obj), None)
@@ -280,6 +279,7 @@ class QuerySet(object):
                     return getattr(obj, field, '')
             else:
                 sort_key = operator.attrgetter(field)
+
         return sort_key, reverse
 
     def exclude(self, **kwargs): # TODO and maybe combine with filter

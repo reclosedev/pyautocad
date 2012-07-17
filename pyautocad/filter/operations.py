@@ -7,7 +7,7 @@ from pyautocad.types import APoint
 
 
 def _custom_operations():
-    # TODO icontains, re, distance
+    # TODO review regex, maybe add iregex
     # a - object.value
     # b - user value
     def op_in(a, b):
@@ -47,8 +47,7 @@ def _custom_operations():
         return len(a)
 
     def op_distance(a, b): # eq check
-        distance = APoint(a).distance_to(b[0])
-        return distance == b[1]
+        return APoint(a).distance_to(b[0]) == b[1]
 
     op_dist = op_distance
 
@@ -59,9 +58,7 @@ def _custom_operations():
     def _create_dist_compare_func(name):
         op = getattr(operator, name)
         def dist_compare(a, b):
-            distance = APoint(a).distance_to(b[0])
-            print distance, op
-            return op(distance, b[1])
+            return op(APoint(a).distance_to(b[0]), b[1])
         dist_compare.__name__ = 'distance_%s' % name
         return dist_compare
 
