@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from pprint import pprint
 import unittest
+import comtypes
 
 from pyautocad import Autocad, aDouble, aShort, aInt, APoint
 from pyautocad.filter import UnknownOperation
@@ -139,20 +141,27 @@ class FilterTestCase(unittest.TestCase):
 
         def bad_attr1(strict):
             qs = model.filter(ObjectName__icontains="dbmtext")
-            qs.best_interface().order_by('-InsertionPoint__x', 'TextStringBAD', strict=strict)
+            qs.best_interface().order_by('-InsertionPoint__x',
+                                         'TextStringBAD', strict=strict)
             return True
         def bad_attr2(strict):
             qs = model.filter(ObjectName__icontains="dbmtext")
-            qs.best_interface().order_by('TextString', '-InsertionBADPoint__x', strict=strict)
+            qs.best_interface().order_by('TextString',
+                                         '-InsertionBADPoint__x', strict=strict)
             return True
 
         self.assert_(bad_attr1(False) and bad_attr2(False))
-
         with self.assertRaises(AttributeError):
             bad_attr1(True)
-
         with self.assertRaises(AttributeError):
             bad_attr2(True)
+
+    def test_issue_not_patched_dynamic(self):
+        doc = self.doc
+        layout = doc.Layouts.Item(1)
+        self.assert_(hasattr(layout, 'filter'))
+        layout = comtypes.client.GetBestInterface(layout)
+        self.assert_(hasattr(layout, 'filter'))
 
 
 if __name__ == '__main__':
