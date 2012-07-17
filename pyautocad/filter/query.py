@@ -21,10 +21,13 @@ class Matcher(BaseMatcher):
         return '<%s %s %r>' % (self.extractor.__name__, self.operation.__name__, self.value)
 
 
+_sentinel = object()
+
+
 class Query(object):
     """ Parses kwargs with Django-ORM-like query and check object for match
     """
-    _sentinel = object()
+
     _acad_entity_fields = frozenset([
         'Application', 'Database', 'Document', 'EntityName', 'EntityType',
         'Handle', 'HasExtensionDictionary', 'Layer', 'Linetype',
@@ -39,7 +42,7 @@ class Query(object):
         # parse 'and' queries
         matchers = []
         for field, value in query_dict.items():
-            extractor, name, operation = self._parse_field(field, value)
+            extractor, name, operation = self._parse_field(field)
             matchers.append(Matcher(extractor, name, operation, value))
         pprint(matchers)
 
@@ -67,7 +70,7 @@ class Query(object):
                 return False, got_best_interface, obj
         return True, got_best_interface, obj
 
-    def _parse_field(self, field, value=None):
+    def _parse_field(self, field, add_eq_operation=True):
         # TODO value can be callable, in this case we should extract attributes and call func against them
         name = field
         operation = operator.eq
@@ -75,7 +78,7 @@ class Query(object):
             fields = field.split('__')
             name = fields[0]
             # if field is ending with property or digit like InsertionPoint__x, add eq op
-            if fields[-1] in extractors_as_operation or fields[-1].isdigit():
+            if add_eq_operation and fields[-1] in extractors_as_operation or fields[-1].isdigit():
                 fields.append('eq')
             if len(fields) == 2:
                 operation = self._get_operation(fields[1])
@@ -103,7 +106,7 @@ class Query(object):
         name = ''.join(name[:1].upper() + name[1:])
 
         def extractor(obj):
-            return getattr(obj, name, self._sentinel)
+            return getattr(obj, name, _sentinel)
         extractor.__name__ = 'Extract<%r>' % name
         return extractor, name
 
@@ -114,7 +117,7 @@ class Query(object):
 def _check_sentinel(func):
     @functools.wraps(func)
     def wrapper(a, b):
-        if a is Query._sentinel:
+        if a is _sentinel:
             return False
         return func(a, b)
     return wrapper
@@ -234,11 +237,60 @@ class QuerySet(object):
     def filter(self, **kwargs):
         return QuerySet(kwargs, block_iterator=iter(self))
 
-    def order_by(self, field): # TODO
-        pass
+    def order_by(self, *fields, **kwargs):
+        reverse = False
+        strict = kwargs.pop('strict', False)
+        if len(fields) == 1:
+            # fast sort for one field
+            sort_key, reverse = self._get_sort_key(fields[0], strict)
+        else:
+            # can be slow, because of Invert key and many function calls
+            sort_keys = [self._get_sort_key(field, strict)
+                         for field in fields]
+            sort_keys, reverses = zip(*sort_keys)
+
+            def sort_key(obj):
+                return map(Inverter, [key_func(obj)
+                                       for key_func in sort_keys], reverses)
+        self.all() # prefetch
+        self._cache.sort(key=sort_key, reverse=reverse)
+        return QuerySet({}, block_iterator=iter(self._cache))
+
+    def _get_sort_key(self, field, strict=False):
+        reverse = False
+        if field.startswith('-'):
+            reverse = True
+            field = field.lstrip('-')
+
+        if '__' in field:
+            extractor, name, operation = self._query._parse_field(field, False)
+            print extractor, name, operation
+            if not strict:
+                def sort_key(obj):
+                    return operation(extractor(obj), None)
+            else:
+                def sort_key(obj):
+                    val = extractor(obj)
+                    if val is _sentinel:
+                        raise AttributeError(extractor.__name__)
+                    return operation(extractor(obj), None)
+        else:
+            if not strict:
+                def sort_key(obj):
+                    return getattr(obj, field, '')
+            else:
+                sort_key = operator.attrgetter(field)
+        return sort_key, reverse
 
     def exclude(self, **kwargs): # TODO and maybe combine with filter
         pass
 
     def best_interface(self):
         return QuerySet({}, block_iterator=iter(self), need_best_interface=True)
+
+
+class Inverter(namedtuple('Inverter', 'item, reverse')):
+    def __lt__(self, other):
+        if self.reverse:
+            return other.item < self.item
+        return self.item < other.item

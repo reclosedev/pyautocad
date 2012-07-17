@@ -25,9 +25,19 @@ class FilterTestCase(unittest.TestCase):
         for i in range(n_lines):
             model.AddLine(p1, p2)
             p1.y += 10
+        cls.texts = []
         for i in range(n_texts):
-            model.AddMText(p2, 10, u'Dummy %s' % i)
+            text = u'Dummy %s' % i
+            cls.texts.append(text)
+            model.AddMText(p2, 10, text)
             p2.x += 10
+
+        cls.layouts_names = []
+        for i in range(5):
+            name = u'TESTLayout %s' % i
+            cls.layouts_names.append(name)
+            cls.doc.Layouts.Add(name)
+        cls.n_layouts = cls.doc.Layouts.Count
 
     @classmethod
     def tearDownClass(cls):
@@ -114,6 +124,36 @@ class FilterTestCase(unittest.TestCase):
         self.assertEqual(len(qs[100:n]), 0)
         qs = model.filter()
         self.assertEqual(len(qs[n - 5:n]), 5)
+
+    def test_order_by(self):
+        doc = self.doc
+        model = self.acad.model
+        qs = doc.Layouts.filter(TabOrder__ne=0, Name__startswith=u"TESTLayout")
+        qs = qs.best_interface().order_by('-TabOrder')
+        res = [obj.Name for obj in qs.all()]
+        self.assertEqual(res, list(reversed(self.layouts_names)))
+
+        qs = model.filter(ObjectName__icontains="dbmtext")
+        qs = qs.best_interface().order_by('TextString__len', '-InsertionPoint__x')
+        self.assertEqual(qs.all()[-1].TextString, u'Dummy 10')
+        self.assertEqual(qs.all()[0].TextString, u'Dummy 9')
+
+        def bad_attr1(strict):
+            qs = model.filter(ObjectName__icontains="dbmtext")
+            qs.best_interface().order_by('-InsertionPoint__x', 'TextStringBAD', strict=strict)
+            return True
+        def bad_attr2(strict):
+            qs = model.filter(ObjectName__icontains="dbmtext")
+            qs.best_interface().order_by('TextString', '-InsertionBADPoint__x', strict=strict)
+            return True
+
+        self.assert_(bad_attr1(False) and bad_attr2(False))
+
+        with self.assertRaises(AttributeError):
+            bad_attr1(True)
+
+        with self.assertRaises(AttributeError):
+            bad_attr2(True)
 
 
 if __name__ == '__main__':
