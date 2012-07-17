@@ -5,8 +5,7 @@ import timeit
 import pyautocad
 from pyautocad import Autocad, APoint
 import time
-from pyautocad import filter
-filter.install()  # TODO change API
+# TODO cleanup and make good demo
 
 
 acad = Autocad()

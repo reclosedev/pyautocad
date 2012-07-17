@@ -3,10 +3,9 @@
 import unittest
 
 from pyautocad import Autocad, aDouble, aShort, aInt, APoint
-import pyautocad.filter
-from pyautocad.filter.query import UnknownOperation
+from pyautocad.filter import UnknownOperation
 
-pyautocad.filter.install()
+
 
 
 class FilterTestCase(unittest.TestCase):

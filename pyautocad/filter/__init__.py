@@ -3,15 +3,18 @@
 from comtypes.partial import partial
 
 import pyautocad
-from .query import QuerySet
+from .query import QuerySet, UnknownOperation
 
 
+__installed = False
 def install():
     """ Add method ``filter`` to IAcadObject and all its children
     """
-    class AcadObjectAdditions(partial, pyautocad.ACAD.IAcadObject):
-        def filter(self, **kwargs):
-            assert hasattr(self, 'Count'), "Object %r is not iterable" % self
-            return QuerySet(kwargs, self)
-
-    return AcadObjectAdditions
+    global __installed
+    if not __installed:
+        class AcadObjectAdditions(partial, pyautocad.ACAD.IAcadObject):
+            def filter(self, **kwargs):
+                assert hasattr(self, 'Count'), "Object %r is not iterable" % self
+                return QuerySet(kwargs, self)
+        __installed = True
+        return AcadObjectAdditions
