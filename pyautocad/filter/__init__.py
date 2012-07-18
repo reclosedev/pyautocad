@@ -19,7 +19,7 @@ except ImportError:
 for lib in (AutoCAD, AXDBLib):
     if lib is not None:
         class _(partial, lib.IAcadObject):
-            def filter(self, **kwargs):
+            def filter(self, *object_names, **kwargs):
                 assert hasattr(self, 'Count'),\
                 "Object %r is not iterable" % self
-                return QuerySet(kwargs, self)
+                return QuerySet(object_names, kwargs, self)

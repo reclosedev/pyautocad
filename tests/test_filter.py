@@ -56,6 +56,10 @@ class FilterTestCase(unittest.TestCase):
 
     def test_operations(self):
         model = self.acad.model
+        self.assertEqual(model.filter('AcDbMText').count(), self.n_texts)
+        self.assertEqual(model.filter('AcDbLine').count(), self.n_lines)
+        self.assertEqual(model.filter('AcDbLine', 'AcDbMText').count(),
+                         self.n_lines + self.n_texts)
         test_set = [
             ({'InsertionPoint__dist': ((10, 10, 0), 30.0)}, 1),
             ({'InsertionPoint__dist_lt': ((10, 10, 0), 30.0)}, 3),

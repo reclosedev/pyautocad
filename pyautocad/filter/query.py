@@ -35,12 +35,14 @@ class Query(object):
         'OwnerID', 'PlotStyleName', 'TrueColor', 'Visible', 'color', 'value'
     ])
 
-    def __init__(self, query_dict):
-        self._matchers = self._parse_query(query_dict)
+    def __init__(self, object_names, query_dict):
+        self._matchers = self._parse_query(object_names, query_dict)
 
-    def _parse_query(self, query_dict):
+    def _parse_query(self, object_names, query_dict):
         # parse 'and' queries
         matchers = []
+        if object_names:
+            query_dict['ObjectName__in'] = object_names
         for field, value in query_dict.items():
             extractor, name, operation = self._parse_field(field)
             matchers.append(Matcher(extractor, name, operation, value))
@@ -143,7 +145,7 @@ class _ChainedOp(object):
 
 
 class QuerySet(object):
-    def __init__(self, query_or_dict,
+    def __init__(self, object_names, query_or_dict,
                  block=None, block_iterator=None, need_best_interface=False):
         if block is not None:
             self._block_iterator = self._iterate_block(block)
@@ -155,7 +157,7 @@ class QuerySet(object):
         if isinstance(query_or_dict, Query):
             self._query = query_or_dict
         else:
-            self._query = Query(query_or_dict)
+            self._query = Query(object_names, query_or_dict)
 
         self._need_best_interface = need_best_interface
         self._iter_started = False
@@ -234,8 +236,8 @@ class QuerySet(object):
             return self._cache[0]
         return next(self.__iter__(), None)
 
-    def filter(self, **kwargs):
-        return QuerySet(kwargs, block_iterator=iter(self))
+    def filter(self, *object_names, **kwargs):
+        return QuerySet(object_names, kwargs, block_iterator=iter(self))
 
     def order_by(self, *fields, **kwargs):
         reverse = False
@@ -254,7 +256,7 @@ class QuerySet(object):
                                        for key_func in sort_keys], reverses)
         self.all() # prefetch
         self._cache.sort(key=sort_key, reverse=reverse)
-        return QuerySet({}, block_iterator=iter(self._cache))
+        return QuerySet([], {}, block_iterator=iter(self._cache))
 
     def _get_sort_key(self, field, strict=False):
         reverse = False
@@ -282,11 +284,11 @@ class QuerySet(object):
 
         return sort_key, reverse
 
-    def exclude(self, **kwargs): # TODO and maybe combine with filter
-        pass
+#    def exclude(self, **kwargs): # TODO and maybe combine with filter
+#        pass
 
     def best_interface(self):
-        return QuerySet({}, block_iterator=iter(self), need_best_interface=True)
+        return QuerySet([], {}, block_iterator=iter(self), need_best_interface=True)
 
 
 class Inverter(namedtuple('Inverter', 'item, reverse')):
