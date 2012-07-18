@@ -14,8 +14,8 @@ __version__ = '0.1.2'
 
 from pyautocad.api import *
 from pyautocad.types import *
-from pyautocad.filter import install
+from pyautocad.filter import *
 
 
-install()
+
 
