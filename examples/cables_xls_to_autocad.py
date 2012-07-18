@@ -82,9 +82,11 @@ def prepare_cables_table(block, pos, rows):
     table.VertCellMargin = 0.5
     table.HorzCellMargin = 0.5
 
-    content = ((u"Обозначение кабеля, провода", u"Трасса", "", u"Кабель, провод", "", "", "", "",),
-               ("", u"Начало", u"Конец", u"По проекту", "", "", u"Проложен", "", ),
-               ("", "", "", u"Марка", u"Кол., число и сечение жил", u"Длина, м", u"Марка", u"Кол., число и сечение жил", u"Длина, м"))
+    content = (
+        (u"Обозначение кабеля, провода", u"Трасса", "", u"Кабель, провод", "", "", "", "",),
+        ("", u"Начало", u"Конец", u"По проекту", "", "", u"Проложен", "", ),
+        ("", "", "", u"Марка", u"Кол., число и сечение жил", u"Длина, м", u"Марка", u"Кол., число и сечение жил", u"Длина, м")
+    )
 
     merged = ((1, 1, 6, 8), (0, 2, 0, 0), (1, 2, 1, 1), (0, 0, 3, 8),
               (0, 0, 0, 0), (1, 2, 2, 2), (1, 1, 3, 5), (0, 0, 1, 2))
@@ -116,7 +118,8 @@ def add_pivot_table(block, pos, pivot):
     table = block.AddTable(pos, len(pivot) + 5, len(pivot[0]), ROW_HEIGHT, 20.0)
     table.RegenerateTableSuppressed = True
     table.SetColumnWidth(0, 35)
-    table.DeleteRows(0, 2)  # delete Header and Title. SuppressHeader and SuppressTitle is not working.
+    # delete Header and Title. SuppressHeader and SuppressTitle is not working.
+    table.DeleteRows(0, 2)
     table.SetAlignment(ACAD.acDataRow, ACAD.acMiddleCenter)
     table.VertCellMargin = 0.5
     table.HorzCellMargin = 0.5
@@ -162,36 +165,37 @@ def calc_pivot_table(data, value_extractor=length_pivot):
     cable_types = set()
 
     for columns in data:
-        pivot[columns[first_key]][columns[second_key]] += value_extractor(try_convert(columns[value_key], int))
+        value = value_extractor(try_convert(columns[value_key], int))
+        pivot[columns[first_key]][columns[second_key]] += value
         cable_types.add(columns[second_key])
     cable_sections = sorted(pivot.keys())
 
     def sections_key(section):
         if '(' in section:  # it's hard to handle multicable feeders
-            return section  # so return untouched (will be on top)
+            return section  # so return untouched (will be in bottom)
         section = normalize_section(section)
-        return map(lambda x: try_convert(x, float), section.split('x'))
-    cable_sections = sorted(cable_sections, key=sections_key)
+        return [try_convert(x, float) for x in section.split('x')]
 
-    yield [u'Cечение'] + list(sorted(cable_types))
+    cable_sections = sorted(cable_sections, key=sections_key)
+    cable_types = sorted(cable_types)
+
+    yield [u'Cечение'] + cable_types
+
     for cable_section in cable_sections:
-        columns = [cable_section]
-        for cable_type in cable_types:
-            columns.append(pivot[cable_section][cable_type])
-        yield columns
+        columns =  [pivot[cable_section][cable_type]
+                    for cable_type in cable_types]
+        yield [cable_section] + columns
 
 
 def calc_pivot_tips(pivot_dcount):
-    tip_counts = []
-    for row in pivot_dcount[1:]:
-        tip_counts.append((row[0], sum(row[1:])))
+    tip_counts = [(row[0], sum(row[1:])) for row in pivot_dcount[1:]]
     result = defaultdict(int)
     for section, count in tip_counts:
         if '(' in section:
             result[section] += count
             continue
         section = normalize_section(section)
-        count_sect = map(lambda x: try_convert(x, float), section.split('x', 2))  # TODO buggy
+        count_sect = [try_convert(x, float) for x in section.split('x', 2)]  # TODO buggy
         if len(count_sect) == 2:
             result[count_sect[1]] += int(count_sect[0] * count)
 
