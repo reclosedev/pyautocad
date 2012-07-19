@@ -1,5 +1,6 @@
 name_to_dxf_code = {
     'type': 0, # Text string indicating the entity type (fixed)
+    'object': 0, # Text string indicating the entity type (fixed)
     'objectname': 0, # Text string indicating the entity type (fixed)
     'text': 1, # Primary text value for an entity
     'name': 2, # Name (attribute tag, block name, and so on)
@@ -18,6 +19,8 @@ name_to_dxf_code = {
     'startpoint3d': 11, # to18Other points
     'position3d': 11, # to18Other points
     'unit_direction': 11, # to18Other points
+    'endpoint': 21,
+    'end_point': 21,
     'thikness': 39, # Entity's thickness if nonzero (fixed)
     'radius': 40, # Floatingtopoint values (text height, scale factors, and so on) to48
     'text_height': 40, # Floatingtopoint values (text height, scale factors, and so on) to48
