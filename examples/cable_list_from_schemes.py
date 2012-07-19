@@ -33,7 +33,7 @@ def get_known_targets(filename):
     return targets
 
 
-def get_cables(acad, block, known_targets):
+def get_cables(acad, doc, known_targets):
     patterns = [ur"""(?P<cable>.*?)-(?P<section>[\dxх,\(\)]+)\s+
                      (?P<length>\d+)\s*[мm]\\P
                      \s*(?P<name>[^-]+)-(?P<source>.+)\s*""",
@@ -43,7 +43,7 @@ def get_cables(acad, block, known_targets):
                       (?P<length>\d+)\s*[мm]"""]
     patterns = [re.compile(pat, re.VERBOSE) for pat in patterns]
 
-    for text in acad.iter_objects("dbmtext", block):
+    for text in doc.select(type="MText", text=u"*-*[xхXХ]*"):
         text = unformat_mtext(text.TextString)
         logger.info(text)
         m_cable = None
@@ -115,7 +115,7 @@ def main():
 
     for doc in documents:
         try:
-            cables = get_cables(acad, doc.Modelspace, known_targets)
+            cables = get_cables(acad, doc, known_targets)
             sorted_cables = sort_cables_by_targets(cables, known_targets)
             for row in sorted_cables:
                 output_table.writerow([s for s in row])
