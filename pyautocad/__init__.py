@@ -12,10 +12,10 @@
 __docformat__ = 'restructuredtext en'
 __version__ = '0.1.2'
 
-from pyautocad.api import *
-from pyautocad.types import *
-from pyautocad.filter import *
-from pyautocad.selset import *
+from .api import *
+from .types import *
+from .filter import *
+from .select import *
 
 
 
