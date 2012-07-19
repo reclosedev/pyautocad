@@ -8,42 +8,49 @@ from pyautocad import Autocad, aDouble, aShort, aInt, APoint
 from pyautocad.filter import UnknownOperation
 
 
+# this functions used in another tests
+def setUpClass(cls):
+    cls.acad = Autocad(True)
+    cls.doc = cls.acad.app.Documents.Add()
+    print 'Current', cls.doc.Name
+
+    model = cls.acad.model
+    p1 = APoint(0, 0, 0)
+    p2 = APoint(10, 10, 0)
+    cls.n_lines = cls.n_circles = n_lines = 10
+    cls.n_texts = n_texts = 15
+    for i in range(n_lines):
+        model.AddLine(p1, p2)
+        model.AddCircle(p1, (i + 1) * 10)
+        p1.y += 10
+    cls.texts = []
+    for i in range(n_texts):
+        text = u'Dummy %s' % i
+        cls.texts.append(text)
+        model.AddMText(p2, 10, text)
+        p2.x += 10
+
+    cls.layouts_names = []
+    for i in range(5):
+        name = u'TESTLayout %s' % i
+        cls.layouts_names.append(name)
+        cls.doc.Layouts.Add(name)
+    cls.n_layouts = cls.doc.Layouts.Count
+
+def tearDownClass(cls):
+    #pass
+    cls.doc.Close(False)
 
 
 class FilterTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.acad = Autocad(True)
-        cls.doc = cls.acad.app.Documents.Add()
-        print 'Current', cls.doc.Name
-
-        model = cls.acad.model
-        p1 = APoint(0, 0, 0)
-        p2 = APoint(10, 10, 0)
-        cls.n_lines = n_lines = 10
-        cls.n_texts = n_texts = 15
-        for i in range(n_lines):
-            model.AddLine(p1, p2)
-            p1.y += 10
-        cls.texts = []
-        for i in range(n_texts):
-            text = u'Dummy %s' % i
-            cls.texts.append(text)
-            model.AddMText(p2, 10, text)
-            p2.x += 10
-
-        cls.layouts_names = []
-        for i in range(5):
-            name = u'TESTLayout %s' % i
-            cls.layouts_names.append(name)
-            cls.doc.Layouts.Add(name)
-        cls.n_layouts = cls.doc.Layouts.Count
+        setUpClass(cls)
 
     @classmethod
     def tearDownClass(cls):
-        #pass
-        cls.doc.Close(False)
+        tearDownClass(cls)
 
     def test_count_objects(self):
         m = self.acad.model
@@ -116,9 +123,9 @@ class FilterTestCase(unittest.TestCase):
             print qs[10].ObjectName
 
         qs = model.filter()
-        n = self.n_lines + self.n_texts
+        n = self.n_lines + self.n_texts + self.n_circles
         self.assertEqual(len(qs[5:]), n - 5)
-        qs = model.filter().best_interface()
+        qs = model.filter(ObjectName__ne="AcDbCircle").best_interface()
         self.assertEqual(qs[1].StartPoint, (0, 10, 0))
         self.assertEqual(qs[2].StartPoint, (0, 20, 0))
 
