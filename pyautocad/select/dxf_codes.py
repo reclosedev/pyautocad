@@ -14,11 +14,23 @@ name_to_dxf_code = {
     'insertionpoint': 10, # "Primary point; this is the start point of a line or text entity, center of a circle, and so on"
     'startpoint': 10, # "Primary point; this is the start point of a line or text entity, center of a circle, and so on"
     'position': 10, # "Primary point; this is the start point of a line or text entity, center of a circle, and so on"
-    'center3d': 11, # to18Other points
-    'insertionpoint3d': 11, # to18Other points
-    'startpoint3d': 11, # to18Other points
-    'position3d': 11, # to18Other points
-    'unit_direction': 11, # to18Other points
+
+    'center_x': 11,
+    'insertionpoint_x': 11,
+    'startpoint_x': 11,
+    'position_x': 11,
+
+    'center_y': 21,
+    'insertionpoint_y': 21,
+    'startpoint_y': 21,
+    'position_y': 21,
+
+    'center_z': 31,
+    'insertionpoint_z': 31,
+    'startpoint_z': 31,
+    'position_z': 31,
+
+    'unit_direction': 11,
     'endpoint': 21,
     'end_point': 21,
     'thikness': 39, # Entity's thickness if nonzero (fixed)
