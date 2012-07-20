@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+.. versionadded:: 0.2.0
+
+    pyautocad.filter
+    ~~~~~~~~~~~~~~~~
+
+    Iterate objects from blocks with filtering in Django-ORM like fashion
+"""
 from comtypes.partial import partial
 from .query import QuerySet, UnknownOperation
 

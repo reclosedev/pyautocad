@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+.. versionadded:: 0.2.0
+
+    pyautocad.filter.operations
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Contains functions to use in filters
+"""
 import operator
 import re
 
@@ -46,7 +54,9 @@ def _custom_operations():
     def op_len(a, b):
         return len(a)
 
-    def op_distance(a, b): # eq check
+    # distance is a special case
+    # this function compares equality instead just extraction of distance
+    def op_distance(a, b):
         return APoint(a).distance_to(b[0]) == b[1]
 
     op_dist = op_distance
@@ -62,6 +72,7 @@ def _custom_operations():
         dist_compare.__name__ = 'distance_%s' % name
         return dist_compare
 
+    # add distance_gt/lt/gt/lte/gte functions
     for name in _standard_operator_names:
         func = _create_dist_compare_func(name)
         func_map['distance_%s' % name] = func_map['dist_%s' % name] = func
@@ -69,6 +80,8 @@ def _custom_operations():
     return func_map
 
 _standard_operator_names = ('eq', 'ne', 'lt', 'le', 'gt', 'ge', 'contains')
+
+#: mapping operation_name -> function where operation_name is: lt, contains, startswith, etc.
 operations = _custom_operations()
 operations.update({name: getattr(operator, name)
                   for name in _standard_operator_names})

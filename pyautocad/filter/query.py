@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+.. versionadded:: 0.2.0
+
+    pyautocad.filter.query
+    ~~~~~~~~~~~~~~~~~~~~~~
+
+    Contains man filter functions and classes
+"""
 import operator
 import functools
 from collections import namedtuple
@@ -8,17 +18,233 @@ import comtypes.client
 
 from .operations import operations, extractors_as_operation
 
+__all__ = ['QuerySet']
 
 class UnknownOperation(Exception):
     """ Raised when operation is unknown
     """
+
+class QuerySet(object):
+    """ Class which recieves user queries and act like iterator or list for results
+
+    When QuerySet is used as iterator, it can't be used second time.
+    After operations such as ``len(qs)`` or ``qs.all()`` results are cached and
+    can be accessed many times.
+    """
+    def __init__(self, object_names, query_or_dict,
+                 block=None, block_iterator=None, need_best_interface=False):
+        """
+        :param object_names:
+            check this names against ObjectName property of object
+        :param query_or_dict:
+            dict in form {SomeProperty__qt: value} or already parsed Query object
+        :param block:
+            block which will be iterated to search objects
+        :param block_iterator:
+            custom iterator can be passed instead block
+        :param need_best_interface:
+            indicates that objects from blocks should be casted to best interface
+            it needed if you want to use properties such as TextString
+        """
+        if block is not None:
+            self._block_iterator = self._iterate_block(block)
+        elif block_iterator is not None:
+            self._block_iterator = block_iterator
+
+        assert self._block_iterator, "Block or block_iterator should be provided"
+
+        if isinstance(query_or_dict, Query):
+            self._query = query_or_dict
+        else:
+            self._query = Query(object_names, query_or_dict)
+
+        self._need_best_interface = need_best_interface
+        self._iter_started = False
+        self._cache = None
+
+    def _iterator(self):
+        assert not self._iter_started, "Can't iterate second time"
+        self._iter_started = True
+        query = self._query
+
+        for obj in self._block_iterator:
+            matches, got_best_interface, obj = query.execute(obj)
+            if matches:
+                if self._need_best_interface:
+                    if not got_best_interface:
+                        obj = comtypes.client.GetBestInterface(obj)
+                yield obj
+
+    def _iterate_block(self, block):
+        count = block.Count
+        for i in xrange(count):
+            obj = block.Item(i)
+            yield obj
+
+    def __iter__(self):
+        if self._cache:
+            return iter(self._cache)
+        return self._iterator()
+
+    def __len__(self):
+        """ used for ``len(qs)`` shortcut for :meth:`count`
+        """
+        return self.count()
+
+    def __getitem__(self, k):
+        """ list like ``__getitem__`` interface.
+
+        Supports slices and random access. If slice has end bound, then results
+        are fetched TODO... otherwise all results are first cached.
+        """
+        # checks are taken from Django
+        if not isinstance(k, (slice, int, long)):
+            raise TypeError
+        assert ((not isinstance(k, slice) and (k >= 0))
+                or (isinstance(k, slice) and (k.start is None or k.start >= 0)
+                    and (k.stop is None or k.stop >= 0))),\
+        "Negative indexing is not supported."
+
+        if self._cache:
+            return self._cache[k]
+
+        if isinstance(k, slice):
+            if k.stop is not None and k.step is None:
+                stop = k.stop
+                gen = self.__iter__()
+                result = []
+                if k.start:
+                    start = k.start
+                    for _ in gen:
+                        start -= 1
+                        if not start:
+                            break
+                for i, obj in enumerate(gen, k.start or 0):
+                    if stop is not None and i >= stop:
+                        break
+                    result.append(obj)
+                return result
+            else:
+                return [self[i] for i in range(*k.indices(len(self)))]
+        return self.all()[k]
+
+    def all(self):
+        """ Returns list of all results
+        """
+        if not self._cache:
+            # we are using __iter__ here, because list(self) can call self.__len__
+            self._cache = list(self.__iter__())
+        return self._cache
+
+    def count(self):
+        """ Returns number of objects for this QuerySet
+        """
+        return len(self.all())
+
+    def first(self):
+        """ Returns first matched object.
+        """
+        if self._cache:
+            return self._cache[0]
+        return next(self.__iter__(), None)
+
+    def filter(self, *object_names, **kwargs):
+        """ Can be used to additional filtering
+
+        ::
+
+            >>> acad.model.filter('AcDbMtext').filter(TextString__contains="1")
+
+        """
+        return QuerySet(object_names, kwargs, block_iterator=iter(self))
+
+    def order_by(self, *fields, **kwargs):
+        """ Order ``QuerySet`` by some fields
+
+        Filter by InsertionPoint x value in ascend order: ::
+
+            >>> acad.model.filter().order_by('-InsertionPoint__x')
+
+        Filter by `TextString` `length` value in descend order and
+        by `InsertionPoint` `x` value in ascend order: ::
+
+            >>> acad.model.filter().order_by('TextString__len', '-InsertionPoint__x')
+
+        """
+        reverse = False
+        strict = kwargs.pop('strict', False)
+        if len(fields) == 1:
+            # fast sort for one field
+            sort_key, reverse = self._get_sort_key(fields[0], strict)
+        else:
+            # can be slow, because of Invert key and many function calls
+            sort_keys = [self._get_sort_key(field, strict)
+                         for field in fields]
+            sort_keys, reverses = zip(*sort_keys)
+
+            def sort_key(obj):
+                return map(Inverter, [key_func(obj)
+                                      for key_func in sort_keys], reverses)
+        self.all() # prefetch
+        self._cache.sort(key=sort_key, reverse=reverse)
+        return QuerySet([], {}, block_iterator=iter(self._cache))
+
+    def best_interface(self):
+        """ Convert all matched objects to best interface
+
+        ::
+
+            >>> acad.model.filter('AcDbMText').best_interface().all()
+
+        """
+        return QuerySet([], {}, block_iterator=iter(self), need_best_interface=True)
+
+    def _get_sort_key(self, field, strict=False):
+        reverse = False
+        if field.startswith('-'):
+            reverse = True
+            field = field.lstrip('-')
+
+        if '__' in field:
+            extractor, name, operation = self._query._parse_field(field, False)
+            if not strict:
+                def sort_key(obj):
+                    return operation(extractor(obj), None)
+            else:
+                def sort_key(obj):
+                    val = extractor(obj)
+                    if val is _sentinel:
+                        raise AttributeError(extractor.__name__)
+                    return operation(extractor(obj), None)
+        else:
+            if not strict:
+                def sort_key(obj):
+                    return getattr(obj, field, '')
+            else:
+                sort_key = operator.attrgetter(field)
+
+        return sort_key, reverse
+
+        # TODO and maybe combine with filter
+    #    def exclude(self, **kwargs):
+    #        pass
+
+
+class Inverter(namedtuple('Inverter', 'item, reverse')):
+    def __lt__(self, other):
+        if self.reverse:
+            return other.item < self.item
+        return self.item < other.item
+
 
 BaseMatcher = namedtuple('BaseMatcher', 'extractor, name, operation, value')
 
 
 class Matcher(BaseMatcher):
     def __repr__(self):
-        return '<%s %s %r>' % (self.extractor.__name__, self.operation.__name__, self.value)
+        return '<%s %s %r>' % (self.extractor.__name__,
+                               self.operation.__name__,
+                               self.value)
 
 
 _sentinel = object()
@@ -142,157 +368,3 @@ class _ChainedOp(object):
     @property
     def __name__(self):
         return self.__repr__()
-
-
-class QuerySet(object):
-    def __init__(self, object_names, query_or_dict,
-                 block=None, block_iterator=None, need_best_interface=False):
-        if block is not None:
-            self._block_iterator = self._iterate_block(block)
-        elif block_iterator is not None:
-            self._block_iterator = block_iterator
-
-        assert self._block_iterator, "Block or block_iterator should be provided"
-
-        if isinstance(query_or_dict, Query):
-            self._query = query_or_dict
-        else:
-            self._query = Query(object_names, query_or_dict)
-
-        self._need_best_interface = need_best_interface
-        self._iter_started = False
-        self._cache = None
-
-    def _iterator(self):
-        assert not self._iter_started, "Can't iterate second time"
-        self._iter_started = True
-        query = self._query
-
-        for obj in self._block_iterator:
-            matches, got_best_interface, obj = query.execute(obj)
-            if matches:
-                if self._need_best_interface:
-                    if not got_best_interface:
-                        obj = comtypes.client.GetBestInterface(obj)
-                yield obj
-
-    def _iterate_block(self, block):
-        count = block.Count
-        for i in xrange(count):
-            obj = block.Item(i)
-            yield obj
-
-    def __iter__(self):
-        if self._cache:
-            return iter(self._cache)
-        return self._iterator()
-
-    def __len__(self):
-        return self.count()
-
-    def __getitem__(self, k):
-        # checks are taken from Django
-        if not isinstance(k, (slice, int, long)):
-            raise TypeError
-        assert ((not isinstance(k, slice) and (k >= 0))
-                or (isinstance(k, slice) and (k.start is None or k.start >= 0)
-                    and (k.stop is None or k.stop >= 0))),\
-        "Negative indexing is not supported."
-
-        if self._cache:
-            return self._cache[k]
-
-        if isinstance(k, slice):
-            if k.stop is not None and k.step is None:
-                stop = k.stop
-                gen = self.__iter__()
-                result = []
-                if k.start:
-                    start = k.start
-                    for _ in gen:
-                        start -= 1
-                        if not start:
-                            break
-                for i, obj in enumerate(gen, k.start or 0):
-                    if stop is not None and i >= stop:
-                        break
-                    result.append(obj)
-                return result
-            else:
-                return [self[i] for i in range(*k.indices(len(self)))]
-        return self.all()[k]
-
-    def all(self):
-        if not self._cache:
-            # we are using __iter__ here, because list(self) can call self.__len__
-            self._cache = list(self.__iter__())
-        return self._cache
-
-    def count(self):
-        return len(self.all())
-
-    def first(self):
-        if self._cache:
-            return self._cache[0]
-        return next(self.__iter__(), None)
-
-    def filter(self, *object_names, **kwargs):
-        return QuerySet(object_names, kwargs, block_iterator=iter(self))
-
-    def order_by(self, *fields, **kwargs):
-        reverse = False
-        strict = kwargs.pop('strict', False)
-        if len(fields) == 1:
-            # fast sort for one field
-            sort_key, reverse = self._get_sort_key(fields[0], strict)
-        else:
-            # can be slow, because of Invert key and many function calls
-            sort_keys = [self._get_sort_key(field, strict)
-                         for field in fields]
-            sort_keys, reverses = zip(*sort_keys)
-
-            def sort_key(obj):
-                return map(Inverter, [key_func(obj)
-                                       for key_func in sort_keys], reverses)
-        self.all() # prefetch
-        self._cache.sort(key=sort_key, reverse=reverse)
-        return QuerySet([], {}, block_iterator=iter(self._cache))
-
-    def _get_sort_key(self, field, strict=False):
-        reverse = False
-        if field.startswith('-'):
-            reverse = True
-            field = field.lstrip('-')
-
-        if '__' in field:
-            extractor, name, operation = self._query._parse_field(field, False)
-            if not strict:
-                def sort_key(obj):
-                    return operation(extractor(obj), None)
-            else:
-                def sort_key(obj):
-                    val = extractor(obj)
-                    if val is _sentinel:
-                        raise AttributeError(extractor.__name__)
-                    return operation(extractor(obj), None)
-        else:
-            if not strict:
-                def sort_key(obj):
-                    return getattr(obj, field, '')
-            else:
-                sort_key = operator.attrgetter(field)
-
-        return sort_key, reverse
-
-#    def exclude(self, **kwargs): # TODO and maybe combine with filter
-#        pass
-
-    def best_interface(self):
-        return QuerySet([], {}, block_iterator=iter(self), need_best_interface=True)
-
-
-class Inverter(namedtuple('Inverter', 'item, reverse')):
-    def __lt__(self, other):
-        if self.reverse:
-            return other.item < self.item
-        return self.item < other.item
