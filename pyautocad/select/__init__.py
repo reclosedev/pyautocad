@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+.. versionadded:: 0.2.0
+
+    pyautocad.select
+    ~~~~~~~~~~~~~~~~
+
+    Add objects to Selection sets in Django-ORM like fashion
+"""
 import array
 import comtypes
 from comtypes.partial import partial
@@ -12,7 +22,7 @@ try:
 except ImportError:
     AutoCAD = None
 
-
+# add select method to IAcadDocument
 class _(partial, AutoCAD.IAcadDocument):
     def select(self, *args, **kwargs):
         tree = Q(*args, **kwargs)

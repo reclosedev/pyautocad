@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+.. versionadded:: 0.2.0
+
+    pyautocad.select.converter
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Functions for conversion of tree to AutoCAD acceptable FilterType and FilterData
+"""
 from .dxf_codes import name_to_dxf_code
 
 
@@ -9,11 +17,32 @@ class ConverterError(Exception):
 DXF_CONDITIONAL_OPERATOR = -4
 
 def convert_tree(node):
+    """ Convert query tree to two list ``FilterType`` and ``FilterData``
+
+    :param node: query tree
+    :raises: ConvertError if field or relational operator is unknown
+    """
     conditions = flatten_selection_tree(node, [])
     return convert_to_filter_type_and_data(conditions)
 
 
+def convert_to_filter_type_and_data(conditions):
+    """ Converts flatt list of conditions to AutoCAD acceptable types
+    """
+    codes = []
+    data = []
+    for cond in conditions:
+        for code, value in convert_condition_to_dxf_codes(cond):
+            codes.append(code)
+            data.append(value)
+    return codes, data
+
+
 def flatten_selection_tree(node, result, level=0):
+    """ Recursively iterates tree and adding its nodes to flat list `result`
+
+    :returns: list `result`
+    """
 
     def show(*items):
         if level:
@@ -37,6 +66,18 @@ def flatten_selection_tree(node, result, level=0):
 
 
 def convert_condition_to_dxf_codes(condition):
+    """ Generates DXF codes from condition tuple::
+
+        >>> list(convert_condition_to_dxf_codes(('type', 'Circle')))
+        [(0, 'Circle')]
+
+    If condition contains some relational operator it
+    will be converted to several tuples::
+
+        >>> list(convert_condition_to_dxf_codes(('radius__gt', 10.0)))
+        [(-4, '>'), (40, 10.0)]
+
+    """
     name, value = condition
     if isinstance(name, int):
         yield name, value
@@ -51,16 +92,6 @@ def convert_condition_to_dxf_codes(condition):
         yield name_to_dxf_code[name], value
     except KeyError:
         raise ConverterError("Unknown field %r" % name)
-
-
-def convert_to_filter_type_and_data(conditions):
-    codes = []
-    data = []
-    for cond in conditions:
-        for code, value in convert_condition_to_dxf_codes(cond):
-            codes.append(code)
-            data.append(value)
-    return codes, data
 
 
 rel_operators_map = {

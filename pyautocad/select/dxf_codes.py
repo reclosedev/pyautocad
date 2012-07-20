@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+.. versionadded:: 0.2.0
+
+    pyautocad.select.dxf_codes
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Contains map of fields used to convert human readable names to DXF code.
+"""
 name_to_dxf_code = {
     'type': 0, # Text string indicating the entity type (fixed)
     'object': 0, # Text string indicating the entity type (fixed)
