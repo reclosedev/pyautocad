@@ -14,7 +14,7 @@ import operator
 import functools
 from collections import namedtuple
 from pprint import pprint
-import comtypes.client
+from comtypes import client
 
 from .operations import operations, extractors_as_operation
 
@@ -72,7 +72,7 @@ class QuerySet(object):
             if matches:
                 if self._need_best_interface:
                     if not got_best_interface:
-                        obj = comtypes.client.GetBestInterface(obj)
+                        obj = client.GetBestInterface(obj)
                 yield obj
 
     def _iterate_block(self, block):
@@ -288,7 +288,7 @@ class Query(object):
             # because GetBestInterface is very expensive we call it in the
             # last moment if all other conditions are meet
             if not got_best_interface and matcher.name not in self._acad_entity_fields:
-                obj = comtypes.client.GetBestInterface(obj)
+                obj = client.GetBestInterface(obj)
                 got_best_interface = True
             obj_value = matcher.extractor(obj)
             try:

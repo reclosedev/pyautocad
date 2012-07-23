@@ -8,7 +8,7 @@
 
     Iterate objects from blocks with filtering in Django-ORM like fashion
 """
-from comtypes.partial import partial
+from comtypes import partial
 from .query import QuerySet, UnknownOperation
 
 __all__ = ['UnknownOperation']
@@ -26,7 +26,7 @@ except ImportError:
 # wee need to add filter to two libraries
 for lib in (AutoCAD, AXDBLib):
     if lib is not None:
-        class _(partial, lib.IAcadObject):
+        class _(partial.partial, lib.IAcadObject):
             def filter(self, *object_names, **kwargs):
                 assert hasattr(self, 'Count'),\
                 "Object %r is not iterable" % self
