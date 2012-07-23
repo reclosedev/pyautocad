@@ -161,6 +161,8 @@ class QuerySet(object):
     def order_by(self, *fields, **kwargs):
         """ Order ``QuerySet`` by some fields
 
+        Examples:
+        
         Filter by InsertionPoint x value in ascend order: ::
 
             >>> acad.model.filter().order_by('-InsertionPoint__x')

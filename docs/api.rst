@@ -25,6 +25,7 @@ This part of the documentation covers all the interfaces of `pyautocad`
 
 -----------------------------------------------------------------------------
 
+
 ``utils`` - Utility functions
 -------------------------------------------------------------
 
@@ -34,8 +35,6 @@ This part of the documentation covers all the interfaces of `pyautocad`
 
    .. autofunction:: timing(message)
    .. autofunction:: suppressed_regeneration_of(table)
-
-
 
 
 
@@ -55,4 +54,30 @@ This part of the documentation covers all the interfaces of `pyautocad`
 .. versionadded:: 0.1.2
 
 .. automodule:: pyautocad.cache
+   :members:
+
+-----------------------------------------------------------------------------
+
+Internal
+---------
+
+Packages providing select and filter functionality
+
+
+``filter`` - Iterate and filter objects in various blocks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. versionadded:: 0.2.0
+
+.. automodule:: pyautocad.filter.query
+   :members:
+
+
+``select`` - Create SelectionSet queries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. versionadded:: 0.2.0
+
+.. automodule:: pyautocad.select
+   :members:
+
+.. automodule:: pyautocad.select.converter
    :members:

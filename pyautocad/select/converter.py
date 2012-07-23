@@ -20,7 +20,7 @@ def convert_tree(node):
     """ Convert query tree to two list ``FilterType`` and ``FilterData``
 
     :param node: query tree
-    :raises: ConvertError if field or relational operator is unknown
+    :raises: :class:`ConvertError` if field or relational operator is unknown
     """
     conditions = flatten_selection_tree(node, [])
     return convert_to_filter_type_and_data(conditions)
