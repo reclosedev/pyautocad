@@ -14,10 +14,18 @@ __all__ = ['Autocad', 'ACAD']
 
 import logging
 import comtypes
+import glob
+import os
 try:
     import comtypes.client
     # generate modules for work with ACAD constants
-    comtypes.client.GetModule(['{851A4561-F4EC-4631-9B0C-E7DC407512C9}', 1, 0])
+    for pattern in ("acax*enu.tlb", "axdb*enu.tlb"):
+        pattern = os.path.join(
+            r"C:\Program Files\Common Files\Autodesk Shared",
+            pattern
+        )
+        tlib = glob.glob(pattern)[0]
+        comtypes.client.GetModule(tlib)
     import comtypes.gen.AutoCAD as ACAD
 except Exception:
     # we are under readthedocs.org and need to mock this
