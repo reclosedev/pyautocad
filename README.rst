@@ -14,7 +14,7 @@ Optional:
 - xlrd_, tablib_
 
 
-Feautures:
+Features:
 -----------
 
 - Simplifies work with coordinates (3D points)
