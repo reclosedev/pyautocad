@@ -15,8 +15,8 @@ setup(
     author_email="reclosedev@gmail.com",
     url="https://github.com/reclosedev/pyautocad",
     install_requires=[
-        'comtypes',
-        ],
+        'comtypes>=1.1.1',
+    ],
     keywords=["autocad", "automation", "activex", "comtypes"],
     license="BSD License",
     include_package_data=True,
