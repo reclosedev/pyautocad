@@ -9,7 +9,7 @@ except ImportError:
 setup(
     name="pyautocad",
     packages=["pyautocad", "pyautocad.contrib"],
-    version="0.1.2",
+    version="0.1.3",
     description="AutoCAD Automation for Python",
     author="Roman Haritonov",
     author_email="reclosedev@gmail.com",
@@ -29,6 +29,6 @@ setup(
         "Operating System :: Microsoft :: Windows",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering",
-        ],
+    ],
     long_description=open('README.rst').read()
 )
