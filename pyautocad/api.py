@@ -59,11 +59,11 @@ class Autocad(object):
         """
         if self._app is None:
             try:
-                self._app = comtypes.client.GetActiveObject('AutoCAD.Application')
+                self._app = comtypes.client.GetActiveObject('AutoCAD.Application', dynamic=True)
             except WindowsError:
                 if not self._create_if_not_exists:
                     raise
-                self._app = comtypes.client.CreateObject('AutoCAD.Application')
+                self._app = comtypes.client.CreateObject('AutoCAD.Application', dynamic=True)
                 self._app.Visible = self._visible
         return self._app
 
