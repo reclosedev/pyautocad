@@ -10,7 +10,7 @@
     :license: BSD, see LICENSE.txt for more details.
 """
 __docformat__ = 'restructuredtext en'
-__version__ = '0.1.3'
+__version__ = '0.2.0'
 
 from pyautocad.api import *
 from pyautocad.types import *
