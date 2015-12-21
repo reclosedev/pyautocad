@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#date: 16.01.12
+from __future__ import unicode_literals
+import os, sys
+sys.path.insert(0, os.path.abspath('..'))
 import unittest
 
 from pyautocad.utils import unformat_mtext, mtext_to_string, string_to_mtext
 
 class UtilsTestCase(unittest.TestCase):
     def test_unformat(self):
-        texts = [ur'{\fGOST type A|b0|i0|c204|p34;ЩО\fGOST type A|b0|i0|c0|p34;2-8}',
-             ur'text\Pwith {\fWide Latin|b0|i0|c0|p18;multi} {\fVerdana|b0|i0|c0|p34;format}',
-             ur'test\P\pxi-3,l3,t3;1.	list1\P2.	list2\P\pi0,l0,tz;\P\pi-3,l3,t3;{\fSymbol|b0|i0|c2|p18;·	}bullet1\P{\fSymbol|b0|i0|c2|p18;·	}bullet2\P\pi0,l0,tz;\P{\fVani|b0|i0|c0|p34;another font} {\fVerdana|b1|i0|c0|p34;and bold}',
+        texts = [r'{\fGOST type A|b0|i0|c204|p34;ЩО\fGOST type A|b0|i0|c0|p34;2-8}',
+             r'text\Pwith {\fWide Latin|b0|i0|c0|p18;multi} {\fVerdana|b0|i0|c0|p34;format}',
+             r'test\P\pxi-3,l3,t3;1.	list1\P2.	list2\P\pi0,l0,tz;\P\pi-3,l3,t3;{\fSymbol|b0|i0|c2|p18;·	}bullet1\P{\fSymbol|b0|i0|c2|p18;·	}bullet2\P\pi0,l0,tz;\P{\fVani|b0|i0|c0|p34;another font} {\fVerdana|b1|i0|c0|p34;and bold}',
              ]
         desired1 = [u'ЩО2-8', u'text\Pwith multi format', u'test\P1.	list1\P2.	list2\P\P·	bullet1\P·	bullet2\P\Panother font and bold']
         desired2 = [u'ЩО2-8', u'text\nwith multi format',
@@ -21,8 +23,8 @@ class UtilsTestCase(unittest.TestCase):
 ·	bullet2
 
 another font and bold"""]
-        result1 = map(unformat_mtext, texts)
-        result2 = map(mtext_to_string, texts)
+        result1 = list(map(unformat_mtext, texts))
+        result2 = list(map(mtext_to_string, texts))
 
         self.assertEqual(result1, desired1)
         self.assertEqual(result2, desired2)

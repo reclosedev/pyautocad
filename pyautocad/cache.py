@@ -11,6 +11,7 @@
     :copyright: (c) 2012 by Roman Haritonov.
     :license: BSD, see LICENSE.txt for more details.
 """
+from __future__ import print_function
 
 
 class Cached(object):
@@ -90,19 +91,17 @@ class Cached(object):
         object.__delattr__(self._instance, key)
 
 
-
-
 if __name__ == "__main__":
     import time
 
     class Foo(object):
         @property
         def x(self):
-            print 'consuming time'
+            print('consuming time')
             time.sleep(1)
             return 42
 
     foo = Foo()
     cached_foo = Cached(foo)
     for i in range(5):
-        print cached_foo.x
+        print(cached_foo.x)

@@ -13,6 +13,8 @@ import array
 import operator
 import math
 
+from pyautocad.compat import IS_PY3
+
 
 class APoint(array.array):
     """ 3D point with basic geometric operations and support for passing as a
@@ -100,13 +102,21 @@ class APoint(array.array):
     def __mul__(self, other):
         return self.__left_op(self, other, operator.mul)
 
-    def __div__(self, other):
-        return self.__left_op(self, other, operator.div)
+    if IS_PY3:
+        def __div__(self, other):
+            return self.__left_op(self, other, operator.truediv)
+    else:
+        def __div__(self, other):
+            return self.__left_op(self, other, operator.div)
 
     __radd__ = __add__
     __rsub__ = __sub__
     __rmul__ = __mul__
     __rdiv__ = __div__
+    __floordiv__ = __div__
+    __rfloordiv__ = __div__
+    __truediv__ = __div__
+    _r_truediv__ = __div__
 
     def __neg__(self):
         return self.__left_op(self, -1, operator.mul)

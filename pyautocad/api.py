@@ -32,6 +32,7 @@ except Exception:
     ACAD = None
 
 import pyautocad.types
+from pyautocad.compat import basestring, xrange
 
 logger = logging.getLogger(__name__)
 

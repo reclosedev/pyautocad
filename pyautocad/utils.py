@@ -9,6 +9,7 @@
     :copyright: (c) 2012 by Roman Haritonov.
     :license: BSD, see LICENSE.txt for more details.
 """
+from __future__ import print_function
 
 import sys
 import re
@@ -108,9 +109,7 @@ def timing(message=u'Elapsed'):
         yield begin
     finally:
         elapsed = (time.time() - begin)
-        print u'%s: %.3f s' % (message, elapsed)
-
-
+        print(u'%s: %.3f s' % (message, elapsed))
 
 
 def dynamic_print(text):

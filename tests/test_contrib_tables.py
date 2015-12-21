@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#date: 13.02.12
-import os
+import os, sys
+sys.path.insert(0, os.path.abspath('..'))
 import unittest
 
 from pyautocad.contrib import tables

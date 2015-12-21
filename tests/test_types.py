@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #date: 17.01.12
+import os, sys
+sys.path.insert(0, os.path.abspath('..'))
 import unittest
 
 from pyautocad.types import APoint, distance
@@ -54,7 +56,6 @@ class PointTestCase(unittest.TestCase):
         for arg in wrong_args:
             with self.assertRaises(TypeError):
                 p = APoint(arg)
-                print arg
 
         p = APoint(0, 0, 0)
         for arg in wrong_args:

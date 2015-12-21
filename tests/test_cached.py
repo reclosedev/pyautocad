@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#date: 16.01.12
+from __future__ import print_function
+import os, sys
+sys.path.insert(0, os.path.abspath('..'))
 import unittest
 import mock
 
@@ -12,17 +14,17 @@ class C(object):
         self._x = None
 
     def getx(self):
-        print "get x"
+        print("get x")
         return self._x
 
     def setx(self, value):
-        print "set x", value
+        print("set x", value)
         self._x = value
 
     x = property(lambda self: self.getx(), lambda self, x: self.setx(x))
 
     def modify(self, val):
-        print "modify", val
+        print("modify", val)
         self._x = val
 
 

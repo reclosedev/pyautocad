@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # date: 16.01.12
+from __future__ import print_function
+import os, sys
+sys.path.insert(0, os.path.abspath('..'))
 from _ctypes import COMError
 import unittest
 
 from pyautocad import Autocad, aDouble, APoint, ACAD
+from pyautocad.compat import unicode
 
 
 NPASS = 3000
@@ -14,7 +18,7 @@ class ApiTestCase(unittest.TestCase):
     def setUp(self):
         self.acad = Autocad(True)
         self.doc = self.acad.app.Documents.Add()
-        print 'Current', self.doc.Name
+        print('Current', self.doc.Name)
 
     def tearDown(self):
         self.doc.Close(False)
