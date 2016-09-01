@@ -24,7 +24,7 @@ Features:
 Simple usage example:
 ---------------------
 
-::
+.. code-block:: python
 
     from pyautocad import Autocad, APoint
 
