@@ -54,7 +54,7 @@ See more examples_ in source distribution.
 Links
 -----
 
-- **Documentation** at `readthedocs.org <http://readthedocs.org/docs/pyautocad/>`_
+- **Documentation** at `readthedocs.org <https://pyautocad.readthedocs.io/>`_
 
 - **Source code and issue tracking** at `GitHub <https://github.com/reclosedev/pyautocad>`_.
 
@@ -65,4 +65,4 @@ Links
 .. _xlrd: http://pypi.python.org/pypi/xlrd
 .. _tablib: http://pypi.python.org/pypi/tablib
 .. _examples: https://github.com/reclosedev/pyautocad/tree/master/examples
-.. _documentation: http://readthedocs.org/docs/pyautocad/
+.. _documentation: https://pyautocad.readthedocs.io/
